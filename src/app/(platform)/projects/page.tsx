@@ -152,9 +152,9 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-black text-[#0A0A0F] tracking-tight">Your Projects</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight">Your Projects</h1>
         <p className="text-[#6B7280] mt-1 text-sm">Manage your active project workspaces</p>
       </motion.div>
 
@@ -166,7 +166,7 @@ export default function ProjectsPage() {
             <h2 className="text-sm font-bold text-[#0A0A0F]">My Ideas</h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#FF2D2D] border border-red-100">{myIdeas.length}</span>
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             {myIdeas.map((idea, i) => {
               const fillPct = idea.max_members > 0 ? Math.round((idea.current_members / idea.max_members) * 100) : 0;
               const statusStyles: Record<string, { pill: string; dot: string; bar: string }> = {
@@ -260,7 +260,7 @@ export default function ProjectsPage() {
           </div>
         </motion.div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {projects.map((project, i) => {
             const s = STATUS_STYLES[project.status as keyof typeof STATUS_STYLES] ?? STATUS_STYLES.active;
             return (

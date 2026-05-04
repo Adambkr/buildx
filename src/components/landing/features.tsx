@@ -63,9 +63,9 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-28 mesh-bg-2">
+    <section className="py-16 sm:py-28 mesh-bg-2">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <FadeIn className="text-center mb-20">
+        <FadeIn className="text-center mb-12 sm:mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white rounded-full text-sm font-semibold text-[#FF2D2D] shadow-sm border border-red-100 mb-6">
             ✦ Platform Features
           </span>

@@ -247,9 +247,9 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
         {/* Tabs */}
-        <div className="flex items-center gap-1 bg-white rounded-2xl border border-[#E2E8F0] p-1.5 mb-8 overflow-x-auto">
+        <div className="flex items-center gap-1 bg-white rounded-2xl border border-[#E2E8F0] p-1 sm:p-1.5 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -304,7 +304,7 @@ export default function AdminPage() {
                   </div>
                 )}
                 {/* Quick links */}
-                <div className="grid sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   {tabs.slice(1).map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id)}
                       className="bg-white rounded-2xl border border-[#E2E8F0] p-5 flex items-center gap-3 hover:border-[#FF2D2D] hover:shadow-md transition-all cursor-pointer text-left">
@@ -329,7 +329,7 @@ export default function AdminPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
                     <input type="text" placeholder="Search by name or email…" value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      className="h-10 pl-10 pr-4 rounded-xl border border-[#E2E8F0] text-sm focus:outline-none focus:border-[#FF2D2D] transition-colors w-64" />
+                      className="h-10 pl-10 pr-4 rounded-xl border border-[#E2E8F0] text-sm focus:outline-none focus:border-[#FF2D2D] transition-colors w-full sm:w-64" />
                   </div>
                 </div>
                 {loading ? (
@@ -339,7 +339,7 @@ export default function AdminPage() {
                 ) : (
                   <div className="divide-y divide-[#F1F5F9]">
                     {filteredUsers.map(u => (
-                      <div key={u.id} className="flex items-center justify-between px-6 py-4 hover:bg-[#F7F7F9] transition-colors">
+                      <div key={u.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#F7F7F9] transition-colors gap-2">
                         <div className="flex items-center gap-3 min-w-0">
                           <Avatar src={null} name={u.username} size="sm" />
                           <div className="min-w-0">

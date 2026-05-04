@@ -202,7 +202,7 @@ export function IdeaFeed({ search = "" }: IdeaFeedProps) {
   return (
     <div>
       {/* Tabs */}
-      <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1.5 mb-8 overflow-x-auto" style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
+      <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1 sm:p-1.5 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide" style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
         {feedTabs.map((tab) => (
           <motion.button
             key={tab.id}
@@ -257,7 +257,7 @@ export function IdeaFeed({ search = "" }: IdeaFeedProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
           >
             {filteredIdeas.map((idea, i) => (
               <IdeaCard

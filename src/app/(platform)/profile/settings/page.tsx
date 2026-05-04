@@ -53,7 +53,7 @@ export default function ProfileSettingsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -64,7 +64,7 @@ export default function ProfileSettingsPage() {
           <ArrowLeft className="w-4 h-4" />Back to Profile
         </Link>
 
-        <h1 className="text-3xl font-black text-[#0A0A0F] tracking-tight mb-1">Edit Profile</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight mb-1">Edit Profile</h1>
         <p className="text-[#9CA3AF] mb-8 text-sm">Update your information and skills.</p>
 
         <div className="glass-strong rounded-3xl border border-white/80 p-6 sm:p-8 space-y-6"
@@ -126,10 +126,10 @@ export default function ProfileSettingsPage() {
               {saveError}
             </div>
           )}
-          <div className="pt-2 flex items-center gap-4">
+          <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <motion.button whileHover={{scale:1.04, boxShadow:"0 6px 20px rgba(255,45,45,0.3)"}} whileTap={{scale:0.97}}
               onClick={handleSave} disabled={loading}
-              className="gradient-bg text-white px-8 py-3 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer disabled:opacity-60"
+              className="gradient-bg text-white px-8 py-3.5 sm:py-3 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer disabled:opacity-60"
             >
               {loading ? "Saving…" : "Save Changes"}
             </motion.button>

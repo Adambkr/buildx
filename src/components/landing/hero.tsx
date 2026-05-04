@@ -92,7 +92,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="flex flex-wrap gap-3"
+              className="flex flex-col sm:flex-row flex-wrap gap-3"
             >
               <Link href={user ? "/ideas" : "/signup"}>
                 <motion.button

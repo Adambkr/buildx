@@ -5,9 +5,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Lightbulb, FolderKanban, Bell, LogOut,
-  Menu, X, Zap, Shield, Briefcase,
+  Zap, Shield, Briefcase,
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
@@ -24,7 +23,6 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, unreadCount } = useAppStore();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -88,8 +86,8 @@ export function Navbar() {
               })}
             </nav>
 
-            {/* Right side */}
-            <div className="flex items-center gap-1.5">
+            {/* Right side — desktop */}
+            <div className="hidden md:flex items-center gap-1.5">
               {user ? (
                 <>
                   <Link
@@ -154,98 +152,48 @@ export function Navbar() {
                   </Link>
                 </div>
               )}
+            </div>
 
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden p-2.5 rounded-xl hover:bg-black/[0.05] transition-colors cursor-pointer ml-1"
-              >
-                <AnimatePresence mode="wait">
-                  {mobileOpen ? (
-                    <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                      <X className="w-5 h-5" />
-                    </motion.div>
-                  ) : (
-                    <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                      <Menu className="w-5 h-5" />
-                    </motion.div>
+            {/* Mobile right side — compact */}
+            <div className="flex md:hidden items-center gap-1">
+              {user ? (
+                <>
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="p-2 rounded-xl hover:bg-red-50 transition-colors"
+                      title="Admin Panel"
+                    >
+                      <Shield className="w-5 h-5 text-[#FF2D2D]" />
+                    </Link>
                   )}
-                </AnimatePresence>
-              </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="p-2 rounded-xl hover:bg-black/[0.05] transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4.5 h-4.5 text-[#9CA3AF]" />
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="px-3 py-2 text-sm font-medium text-[#6B7280]"
+                  >
+                    Sign in
+                  </Link>
+                  <Link href="/signup"
+                    className="inline-flex px-4 py-2 text-sm font-semibold gradient-bg text-white rounded-2xl shadow-md shadow-red-200/40"
+                  >
+                    Start
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* Mobile Nav */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed inset-x-0 top-16 z-40 glass-strong border-b border-white/60 md:hidden"
-            style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.08)" }}
-          >
-            <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
-              {navLinks.map((link, i) => {
-                const isActive = pathname.startsWith(link.href);
-                return (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-medium transition-all",
-                        isActive
-                          ? "bg-gradient-to-r from-red-50 to-orange-50 text-[#FF2D2D]"
-                          : "text-[#6B7280] hover:bg-black/[0.04] hover:text-[#0A0A0F]"
-                      )}
-                    >
-                      <link.icon className="w-5 h-5" />
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              {user ? (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-                  className="pt-2 mt-2 border-t border-black/[0.06] flex items-center justify-between px-2">
-                  <Link href={`/profile/${user.id}`} onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3">
-                    <Avatar src={user.avatar_url} name={user.username || "User"} size="sm" />
-                    <div>
-                      <p className="text-sm font-semibold text-[#0A0A0F]">{user.username}</p>
-                      <p className="text-xs text-[#9CA3AF]">{user.email}</p>
-                    </div>
-                  </Link>
-                  <button onClick={handleSignOut} className="p-2 rounded-xl hover:bg-red-50 transition-colors cursor-pointer">
-                    <LogOut className="w-4 h-4 text-[#FF2D2D]" />
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-                  className="pt-3 mt-2 border-t border-black/[0.06] flex gap-2">
-                  <Link href="/login" onClick={() => setMobileOpen(false)}
-                    className="flex-1 py-3 text-center text-sm font-medium text-[#6B7280] border border-black/[0.08] rounded-2xl hover:bg-black/[0.04] transition-colors">
-                    Sign in
-                  </Link>
-                  <Link href="/signup" onClick={() => setMobileOpen(false)}
-                    className="flex-1 py-3 text-center text-sm font-semibold gradient-bg text-white rounded-2xl shadow-md shadow-red-200/40">
-                    Get Started
-                  </Link>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

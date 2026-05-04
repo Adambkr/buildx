@@ -294,7 +294,7 @@ export default function ProjectDetailPage({
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -346,7 +346,7 @@ export default function ProjectDetailPage({
         )}
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1.5 mb-6 overflow-x-auto" style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
+        <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1 sm:p-1.5 mb-5 sm:mb-6 overflow-x-auto scrollbar-hide" style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
           {tabs.map((tab) => (
             <motion.button key={tab.id} whileTap={{ scale: 0.96 }}
               onClick={() => setActiveTab(tab.id)}
@@ -482,7 +482,7 @@ export default function ProjectDetailPage({
                     className="flex items-center gap-1.5 gradient-bg text-white px-4 py-2 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer"
                   ><Plus className="w-4 h-4" />Add Task</motion.button>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {(["todo", "in_progress", "done"] as const).map((status) => {
                     const config = taskStatusConfig[status];
                     const statusTasks = tasks.filter((t) => t.status === status);

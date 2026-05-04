@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Navbar } from "@/components/navbar";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { useAppStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
 
@@ -124,7 +125,8 @@ export default function PlatformLayout({
   return (
     <>
       <Navbar />
-      <main className="flex-1 bg-[#FAFAFA] min-h-screen">{children}</main>
+      <main className="flex-1 bg-[#FAFAFA] min-h-screen pb-20 md:pb-0">{children}</main>
+      <MobileBottomNav />
     </>
   );
 }

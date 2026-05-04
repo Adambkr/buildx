@@ -18,9 +18,9 @@ const testimonials = [
 
 export function SocialProof() {
   return (
-    <section className="py-28 bg-white">
+    <section className="py-16 sm:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <FadeIn className="text-center mb-20">
+        <FadeIn className="text-center mb-12 sm:mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F0F0F5] rounded-full text-sm font-semibold text-[#6B7280] border border-black/[0.06] mb-6">
             ♥ Community Love
           </span>

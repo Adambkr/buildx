@@ -338,9 +338,9 @@ export default function IdeaDetailPage({
   const alreadyApplied = applications.some((a) => a.user_id === user?.id);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#9CA3AF] hover:text-[#0A0A0F] transition-colors mb-6 font-medium">
+        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#9CA3AF] hover:text-[#0A0A0F] transition-colors mb-5 sm:mb-6 font-medium">
           <ArrowLeft className="w-4 h-4" />
           Back to Ideas
         </Link>
@@ -392,7 +392,7 @@ export default function IdeaDetailPage({
           </div>
 
           {/* Stats bar */}
-          <div className="px-6 sm:px-8 py-3 bg-black/[0.02] border-t border-b border-black/[0.06] flex items-center justify-between">
+          <div className="px-4 sm:px-8 py-3 bg-black/[0.02] border-t border-b border-black/[0.06] flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-5">
               <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
                 onClick={handleLike}

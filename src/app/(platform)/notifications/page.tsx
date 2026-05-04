@@ -164,11 +164,11 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black text-[#0A0A0F] tracking-tight">Notifications</h1>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight">Notifications</h1>
             <p className="text-[#9CA3AF] mt-1 text-sm">
               {unreadCount > 0
                 ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
@@ -196,7 +196,7 @@ export default function NotificationsPage() {
               >
                 <button type="button" onClick={() => handleNotificationClick(notification)}
                   className={cn(
-                    "flex items-start gap-4 p-4 rounded-2xl border transition-all duration-200 group",
+                    "w-full text-left flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 group",
                     notification.read
                       ? "glass-strong border-white/80 hover:border-black/10"
                       : "bg-[#FFF8F8] border-red-100 shadow-sm"

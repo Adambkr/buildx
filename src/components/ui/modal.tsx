@@ -14,12 +14,15 @@ interface ModalProps {
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) {
+      document.addEventListener("keydown", handleEsc);
+      document.body.style.overflow = "hidden";
+    }
     return () => {
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", handleEsc);
       document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
@@ -27,38 +30,41 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={onClose}
           />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
+          {/* Bottom sheet on mobile, centered card on desktop */}
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="relative w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/80 p-5 sm:p-8 z-10 max-h-[90vh] overflow-y-auto"
+            style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}
+          >
+            {/* Drag handle indicator for mobile */}
+            <div className="sm:hidden flex justify-center mb-3">
+              <div className="w-10 h-1 bg-black/10 rounded-full" />
+            </div>
+            <div className="flex items-center justify-between mb-5">
               {title && (
-                <div className="flex items-center justify-between p-6 pb-0">
-                  <h2 className="text-xl font-bold text-[#0F172A]">{title}</h2>
-                  <button
-                    onClick={onClose}
-                    className="p-2 rounded-xl hover:bg-[#F7F7F9] transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5 text-[#64748B]" />
-                  </button>
-                </div>
+                <h2 className="text-lg sm:text-xl font-bold text-[#0A0A0F]">{title}</h2>
               )}
-              <div className="p-6">{children}</div>
-            </motion.div>
-          </div>
-        </>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-black/[0.05] transition-colors cursor-pointer ml-auto"
+              >
+                <X className="w-5 h-5 text-[#9CA3AF]" />
+              </button>
+            </div>
+            {children}
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

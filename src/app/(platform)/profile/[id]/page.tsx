@@ -82,7 +82,7 @@ export default function ProfilePage({
   }, [id]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -171,7 +171,7 @@ export default function ProfilePage({
             </div>
 
             {/* Activity Stats */}
-            <div className="grid md:grid-cols-2 gap-5 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mt-5 sm:mt-6">
               {[
                 { icon: Lightbulb, label: "Ideas Posted", count: ideasCount, color: "text-[#FF2D2D]", bg: "bg-[#FFF0F0]", bar: "from-[#FF2D2D] to-[#FF9A3C]" },
                 { icon: FolderKanban, label: "Projects Joined", count: projectsCount, color: "text-emerald-500", bg: "bg-emerald-50", bar: "from-emerald-400 to-teal-500" },

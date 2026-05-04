@@ -44,13 +44,13 @@ export function IdeaCard({ idea, index = 0, rankScore }: IdeaCardProps) {
         <motion.div
           whileHover={{ y: -6 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="group glass-strong rounded-3xl border border-white/80 overflow-hidden h-full flex flex-col cursor-pointer"
+          className="group glass-strong rounded-2xl sm:rounded-3xl border border-white/80 overflow-hidden h-full flex flex-col cursor-pointer"
           style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
         >
           {/* Colorful top bar */}
           <div className={`h-1.5 w-full bg-gradient-to-r ${catGradient}`} />
 
-          <div className="p-5 flex flex-col flex-1">
+          <div className="p-4 sm:p-5 flex flex-col flex-1">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2.5">

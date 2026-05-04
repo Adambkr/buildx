@@ -9,7 +9,7 @@ import { useAppStore } from "@/lib/store";
 export function CTA() {
   const user = useAppStore((s) => s.user);
   return (
-    <section className="py-28 mesh-bg">
+    <section className="py-16 sm:py-28 mesh-bg">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <FadeIn>
           <div className="relative overflow-hidden rounded-[2.5rem] p-1"
@@ -64,7 +64,7 @@ export function CTA() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="flex flex-wrap gap-4 justify-center"
+                  className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-center"
                 >
                   <Link href={user ? "/ideas" : "/signup"}>
                     <motion.button

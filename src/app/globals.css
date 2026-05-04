@@ -239,8 +239,75 @@ body {
   letter-spacing: -0.025em;
 }
 
+/* ── Mobile-first fixes ─────────────────── */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Prevent iOS zoom on input focus — ensure all inputs are ≥16px */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+@media (min-width: 768px) {
+  input, select, textarea {
+    font-size: inherit !important;
+  }
+}
+
+/* Touch interaction improvements */
+@media (pointer: coarse) {
+  /* Ensure minimum 44px tap target for standalone interactive elements */
+  button:not(.inline-btn), [role="button"]:not(.inline-btn) {
+    min-height: 44px;
+  }
+
+  /* Disable hover effects on touch devices to avoid sticky states */
+  .card-hover:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Reduce heavy animations on touch/mobile */
+  .animate-float,
+  .animate-float-delay,
+  .animate-float-delay-2 {
+    animation: none;
+  }
+}
+
+/* Safe area insets for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevent content overflow */
+.max-w-7xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl {
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .max-w-7xl { max-width: 80rem; }
+  .max-w-5xl { max-width: 64rem; }
+  .max-w-4xl { max-width: 56rem; }
+  .max-w-3xl { max-width: 48rem; }
+  .max-w-2xl { max-width: 42rem; }
+}
+
 /* ── Scrollbar ───────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.22); }
+
+/* Hide scrollbar for horizontal tab scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

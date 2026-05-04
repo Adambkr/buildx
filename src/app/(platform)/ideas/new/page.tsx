@@ -121,7 +121,7 @@ export default function NewIdeaPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -130,7 +130,7 @@ export default function NewIdeaPage() {
           <ArrowLeft className="w-4 h-4" />Back to Ideas
         </Link>
 
-        <h1 className="text-3xl font-black text-[#0A0A0F] tracking-tight mb-1">Post a New Idea</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight mb-1">Post a New Idea</h1>
         <p className="text-[#9CA3AF] mb-8 text-sm">Share your vision and find your dream team.</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -207,7 +207,7 @@ export default function NewIdeaPage() {
             </div>
 
             {/* Custom role input */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-4">
               <Input
                 placeholder="Custom role name..."
                 value={roleInput}

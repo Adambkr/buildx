@@ -111,7 +111,7 @@ export default function MyWorkPage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         {/* Header */}
         <div className="mb-8">
@@ -127,7 +127,7 @@ export default function MyWorkPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             { label: "To Do", count: todo, icon: Circle, color: "text-[#6B7280]", accent: "from-gray-100 to-slate-100", num: "text-[#374151]" },
             { label: "In Progress", count: inProgress, icon: Clock, color: "text-amber-500", accent: "from-amber-50 to-orange-50", num: "text-amber-600" },
@@ -147,7 +147,7 @@ export default function MyWorkPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1.5 mb-6 overflow-x-auto"
+        <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1 sm:p-1.5 mb-5 sm:mb-6 overflow-x-auto scrollbar-hide"
           style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
           {tabs.map((tab) => (
             <motion.button key={tab.id} whileTap={{ scale: 0.96 }}
