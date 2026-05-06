@@ -25,13 +25,13 @@ export function Button({
 
   const variants = {
     primary:
-      "gradient-bg text-white shadow-md shadow-red-200 hover:shadow-lg hover:shadow-red-300",
+      "bg-gradient-hero text-white shadow-lg shadow-[#FF3366]/20 hover:shadow-xl hover:shadow-[#FF3366]/30",
     secondary:
-      "bg-[#FFF0F0] text-[#FF2D2D] hover:bg-[#FFE0E0]",
+      "bg-[#FF3366]/10 text-[#FF3366] border border-[#FF3366]/20 hover:bg-[#FF3366]/15",
     outline:
-      "border-2 border-[#E2E8F0] text-[#0F172A] hover:border-[#FF2D2D] hover:text-[#FF2D2D]",
+      "border border-white/[0.08] text-white hover:border-[#FF3366]/30 hover:bg-white/[0.04]",
     ghost:
-      "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F7F7F9]",
+      "text-[#64748B] hover:text-white hover:bg-white/[0.04]",
   };
 
   const sizes = {

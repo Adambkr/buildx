@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 
 const navItems = [
-  { href: "/challenges", label: "Challenges", icon: Crosshair },
-  { href: "/runs", label: "Runs", icon: Flame },
+  { href: "/ideas", label: "Challenges", icon: Crosshair },
+  { href: "/projects", label: "Runs", icon: Flame },
   { href: "/my-work", label: "My Work", icon: Briefcase },
   { href: "/notifications", label: "Alerts", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },

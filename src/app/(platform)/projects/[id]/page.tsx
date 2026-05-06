@@ -3,13 +3,12 @@
 import { useState, useEffect, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, Plus, Send, CheckCircle2, Circle, Clock,
-  Users, ListTodo, MessageSquare, BarChart3, Zap,
-  Flag, Activity, Target, ChevronRight, UserCheck,
-  Trophy, Swords, Crosshair, Flame, Star, Rocket
+  ArrowLeft, Plus, Send, CheckCircle2,
+  Users, MessageSquare, BarChart3, Zap,
+  Flag, Activity,
+  Trophy, Swords, Flame, Rocket
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -17,7 +16,7 @@ import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
-import type { Project, Task, Milestone, Phase, ActivityFeedItem, ProjectMember, SquadMember, Post } from "@/lib/types";
+import type { Project, Task, Milestone, ActivityFeedItem, ProjectMember, Post } from "@/lib/types";
 
 type Tab = "overview" | "missions" | "phases" | "chat" | "squad" | "activity";
 
@@ -107,7 +106,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ id: string
       try {
         const supabase = createClient();
         const { data } = await supabase.from("challenge_runs").select("*, members:run_members(*, user:users!run_members_user_id_fkey(*))").eq("id", id).single();
-        if (data) setProject(data);
+        if (data) { setProject(data); if (data.members) setMembers(data.members as ProjectMember[]); }
         const [tasksRes, milestonesRes, postsRes, activityRes] = await Promise.all([
           supabase.from("missions").select("*").eq("run_id", id).order("created_at", { ascending: true }),
           supabase.from("phases").select("*").eq("run_id", id).order("sort_order", { ascending: true }),

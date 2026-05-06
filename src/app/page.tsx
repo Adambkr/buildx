@@ -105,7 +105,7 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/challenges">
+              <Link href="/ideas">
                 <motion.span
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
@@ -115,7 +115,7 @@ export default function Home() {
                   Start a Challenge
                 </motion.span>
               </Link>
-              <Link href="/challenges">
+              <Link href="/ideas">
                 <motion.span
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
@@ -217,7 +217,7 @@ export default function Home() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map((cat, i) => (
               <FadeIn key={cat.name} delay={i * 0.05}>
-                <Link href={`/challenges?category=${cat.name}`}>
+                <Link href={`/ideas?category=${cat.name}`}>
                   <motion.div
                     whileHover={{ y: -4, scale: 1.02 }}
                     className="glass-dark rounded-xl p-5 border border-white/[0.06] hover:border-[#A855F7]/20 transition-all cursor-pointer text-center group"
@@ -243,7 +243,7 @@ export default function Home() {
                 <span className="label-caps text-[#00E5FF] mb-3 block">Trending Now</span>
                 <h2 className="heading-1">Featured Challenges</h2>
               </div>
-              <Link href="/challenges" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#FF3366] hover:text-[#FF6B9D] transition-colors">
+              <Link href="/ideas" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-[#FF3366] hover:text-[#FF6B9D] transition-colors">
                 View All <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -303,7 +303,7 @@ export default function Home() {
           </div>
 
           <div className="sm:hidden mt-6 text-center">
-            <Link href="/challenges" className="inline-flex items-center gap-1 text-sm font-semibold text-[#FF3366]">
+            <Link href="/ideas" className="inline-flex items-center gap-1 text-sm font-semibold text-[#FF3366]">
               View All Challenges <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -380,7 +380,7 @@ export default function Home() {
               <p className="text-[#94A3B8] mb-8 max-w-lg mx-auto">
                 Join thousands of builders turning challenges into shipped projects. Your next adventure starts now.
               </p>
-              <Link href="/challenges">
+              <Link href="/ideas">
                 <motion.span
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.97 }}
@@ -408,8 +408,8 @@ export default function Home() {
               </span>
             </div>
             <div className="flex items-center gap-6 text-sm text-[#64748B]">
-              <Link href="/challenges" className="hover:text-white transition-colors">Challenges</Link>
-              <Link href="/runs" className="hover:text-white transition-colors">Runs</Link>
+              <Link href="/ideas" className="hover:text-white transition-colors">Challenges</Link>
+              <Link href="/projects" className="hover:text-white transition-colors">Runs</Link>
               <Link href="/my-work" className="hover:text-white transition-colors">My Work</Link>
             </div>
             <p className="text-xs text-[#475569]">BuildX Platform. Built for builders.</p>

@@ -12,21 +12,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn, timeAgo } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminTab = "overview" | "analytics" | "users" | "ideas" | "projects" | "applications";
+type AdminTab = "overview" | "analytics" | "users" | "challenges" | "runs" | "applications";
 
 const tabs: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: BarChart3 },
   { id: "analytics", label: "Analytics", icon: PieChart },
   { id: "users", label: "Users", icon: Users },
-  { id: "ideas", label: "Ideas", icon: Lightbulb },
-  { id: "projects", label: "Projects", icon: FolderKanban },
+  { id: "challenges", label: "Challenges", icon: Lightbulb },
+  { id: "runs", label: "Runs", icon: FolderKanban },
   { id: "applications", label: "Applications", icon: Shield },
 ];
 
@@ -80,7 +78,7 @@ function MiniBar({ data, color, label }: { data: number[]; color: string; label:
   const max = Math.max(...data, 1);
   return (
     <div>
-      <p className="text-xs font-semibold text-[#94A3B8] mb-2">{label}</p>
+      <p className="text-xs font-semibold text-[#64748B] mb-2">{label}</p>
       <div className="flex items-end gap-1 h-16">
         {data.map((v, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -106,7 +104,7 @@ function ProgressRing({ value, max, label, color }: { value: number; max: number
     <div className="flex flex-col items-center gap-2">
       <div className="relative w-24 h-24">
         <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-          <circle cx="48" cy="48" r="40" fill="none" stroke="#F1F5F9" strokeWidth="6" />
+          <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
           <motion.circle
             cx="48" cy="48" r="40" fill="none" stroke={color} strokeWidth="6"
             strokeLinecap="round" strokeDasharray={circumference}
@@ -116,7 +114,7 @@ function ProgressRing({ value, max, label, color }: { value: number; max: number
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-lg font-black text-[#0F172A]">{pct}%</span>
+          <span className="text-lg font-black text-white">{pct}%</span>
         </div>
       </div>
       <p className="text-xs font-semibold text-[#64748B] text-center">{label}</p>
@@ -130,7 +128,7 @@ function HBar({ label, value, total, color }: { label: string; value: number; to
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-[#64748B] w-24 truncate">{label}</span>
-      <div className="flex-1 h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -138,7 +136,7 @@ function HBar({ label, value, total, color }: { label: string; value: number; to
           className={cn("h-full rounded-full", color)}
         />
       </div>
-      <span className="text-xs font-bold text-[#0F172A] w-8 text-right">{value}</span>
+      <span className="text-xs font-bold text-white w-8 text-right">{value}</span>
     </div>
   );
 }
@@ -154,6 +152,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [ideas, setIdeas] = useState<AdminIdea[]>([]);
   const [projects, setProjects] = useState<AdminProject[]>([]);
+  // activeTab alias handled via tabs definition
   const [applications, setApplications] = useState<AdminApplication[]>([]);
   const [allDataLoaded, setAllDataLoaded] = useState(false);
 
@@ -163,6 +162,7 @@ export default function AdminPage() {
   const [ideaSort, setIdeaSort] = useState<"newest" | "popular" | "views">("newest");
   const [ideaStatusFilter, setIdeaStatusFilter] = useState<"all" | "open" | "full" | "closed">("all");
   const [appStatusFilter, setAppStatusFilter] = useState<"all" | "pending" | "accepted" | "rejected">("all");
+  // activeTab state uses "challenges" / "runs" tabs
 
   // Confirm modal
   const [confirm, setConfirm] = useState<{
@@ -394,14 +394,14 @@ export default function AdminPage() {
   }, [applications, q, appStatusFilter]);
 
   const statCards = stats ? [
-    { label: "Total Users", value: stats.total_users, icon: Users, color: "text-blue-500", bg: "bg-blue-50", delta: analytics?.recentUsers },
-    { label: "Active Ideas", value: stats.open_ideas, icon: Lightbulb, color: "text-amber-500", bg: "bg-amber-50" },
-    { label: "Active Projects", value: stats.active_projects, icon: FolderKanban, color: "text-emerald-500", bg: "bg-emerald-50" },
-    { label: "Pending Apps", value: stats.pending_applications, icon: Clock, color: "text-[#FF2D2D]", bg: "bg-red-50" },
-    { label: "Total Ideas", value: stats.total_ideas, icon: TrendingUp, color: "text-violet-500", bg: "bg-violet-50" },
-    { label: "Full Teams", value: stats.full_ideas, icon: CheckCircle, color: "text-teal-500", bg: "bg-teal-50" },
-    { label: "Total Projects", value: stats.total_projects, icon: FolderKanban, color: "text-indigo-500", bg: "bg-indigo-50" },
-    { label: "Total Apps", value: stats.total_applications, icon: Shield, color: "text-pink-500", bg: "bg-pink-50" },
+    { label: "Total Users", value: stats.total_users, icon: Users, color: "text-[#00E5FF]", bg: "bg-[#00E5FF]/10", delta: analytics?.recentUsers },
+    { label: "Open Challenges", value: stats.open_ideas, icon: Lightbulb, color: "text-[#FFD700]", bg: "bg-[#FFD700]/10" },
+    { label: "Active Runs", value: stats.active_projects, icon: FolderKanban, color: "text-[#00FFA3]", bg: "bg-[#00FFA3]/10" },
+    { label: "Pending Apps", value: stats.pending_applications, icon: Clock, color: "text-[#FF3366]", bg: "bg-[#FF3366]/10" },
+    { label: "Total Challenges", value: stats.total_ideas, icon: TrendingUp, color: "text-[#A855F7]", bg: "bg-[#A855F7]/10" },
+    { label: "Full Squads", value: stats.full_ideas, icon: CheckCircle, color: "text-[#00E5FF]", bg: "bg-[#00E5FF]/10" },
+    { label: "Total Runs", value: stats.total_projects, icon: FolderKanban, color: "text-[#FF6B9D]", bg: "bg-[#FF6B9D]/10" },
+    { label: "Total Apps", value: stats.total_applications, icon: Shield, color: "text-[#FF3366]", bg: "bg-[#FF3366]/10" },
   ] : [];
 
   const dayLabels = Array.from({ length: 7 }, (_, i) => {
@@ -410,33 +410,28 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F7F7F9]">
+    <div className="min-h-screen bg-[#050507]">
       {/* Admin Header */}
-      <div className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40">
+      <div className="border-b border-white/[0.06] bg-[#050507]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 gradient-bg rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-hero rounded-xl flex items-center justify-center shadow-lg shadow-[#FF3366]/20">
                 <Flame className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <span className="text-lg font-bold text-[#0F172A]">
-                  Build<span className="gradient-text">X</span>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black text-white">
+                  Build<span className="text-gradient">X</span>
                 </span>
-                <Badge variant="primary" className="ml-2">Admin</Badge>
+                <span className="text-xs font-bold px-2 py-0.5 bg-[#FF3366]/10 text-[#FF3366] border border-[#FF3366]/20 rounded-full">Admin</span>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={refresh}
-                className="p-2 rounded-xl hover:bg-[#F7F7F9] transition-colors cursor-pointer"
-                title="Refresh"
-              >
+              <button onClick={refresh}
+                className="p-2 rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer" title="Refresh">
                 <RefreshCw className={cn("w-4 h-4 text-[#64748B]", loading && "animate-spin")} />
               </button>
-              <Link href="/ideas" className="text-sm text-[#64748B] hover:text-[#0F172A] transition-colors">
-                ← Back to App
-              </Link>
+              <Link href="/ideas" className="text-sm text-[#64748B] hover:text-white transition-colors">← Back to App</Link>
             </div>
           </div>
         </div>
@@ -444,20 +439,18 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
         {/* Tabs */}
-        <div className="flex items-center gap-1 bg-white rounded-2xl border border-[#E2E8F0] p-1 sm:p-1.5 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1 glass-dark rounded-2xl border border-white/[0.06] p-1 sm:p-1.5 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
-            <button
-              key={tab.id}
+            <button key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSearchQuery(""); }}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap cursor-pointer",
+                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer",
                 activeTab === tab.id
-                  ? "gradient-bg text-white shadow-md shadow-red-200"
-                  : "text-[#64748B] hover:text-[#0F172A] hover:bg-[#F7F7F9]"
+                  ? "bg-gradient-hero text-white shadow-lg shadow-[#FF3366]/20"
+                  : "text-[#64748B] hover:text-white hover:bg-white/[0.04]"
               )}
             >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
+              <tab.icon className="w-4 h-4" />{tab.label}
             </button>
           ))}
         </div>
@@ -476,19 +469,19 @@ export default function AdminPage() {
                 {/* Health Score Banner */}
                 {analytics && (
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden"
+                    className="glass-dark rounded-2xl border border-white/[0.06] p-6 sm:p-8 mb-6 relative overflow-hidden"
                   >
-                    <div className="absolute inset-0 opacity-10" style={{backgroundImage:"radial-gradient(circle at 80% 20%, #FF2D2D 0%, transparent 50%)"}} />
+                    <div className="absolute inset-0 opacity-20" style={{backgroundImage:"radial-gradient(circle at 80% 20%, #FF3366 0%, transparent 50%)"}} />
                     <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div>
-                        <p className="text-white/60 text-sm font-medium mb-1">Platform Health Score</p>
+                        <p className="text-[#64748B] text-sm font-medium mb-1">Platform Health Score</p>
                         <div className="flex items-center gap-3">
-                          <span className="text-4xl font-black">{analytics.healthScore}</span>
-                          <span className="text-white/40 text-lg">/100</span>
-                          <span className={cn("text-sm font-bold px-3 py-1 rounded-full",
-                            analytics.healthScore >= 75 ? "bg-emerald-500/20 text-emerald-400" :
-                            analytics.healthScore >= 50 ? "bg-amber-500/20 text-amber-400" :
-                            "bg-red-500/20 text-red-400"
+                          <span className="text-4xl font-black text-white">{analytics.healthScore}</span>
+                          <span className="text-[#64748B] text-lg">/100</span>
+                          <span className={cn("text-sm font-bold px-3 py-1 rounded-full border",
+                            analytics.healthScore >= 75 ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" :
+                            analytics.healthScore >= 50 ? "bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20" :
+                            "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20"
                           )}>
                             {analytics.healthScore >= 75 ? "Healthy" : analytics.healthScore >= 50 ? "Fair" : "Needs Attention"}
                           </span>
@@ -496,16 +489,16 @@ export default function AdminPage() {
                       </div>
                       <div className="flex gap-6">
                         <div className="text-center">
-                          <p className="text-2xl font-black">{analytics.recentUsers}</p>
-                          <p className="text-xs text-white/40">New today</p>
+                          <p className="text-2xl font-black text-white">{analytics.recentUsers}</p>
+                          <p className="text-xs text-[#64748B]">New today</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-black">{analytics.conversionRate}%</p>
-                          <p className="text-xs text-white/40">Accept rate</p>
+                          <p className="text-2xl font-black text-white">{analytics.conversionRate}%</p>
+                          <p className="text-xs text-[#64748B]">Accept rate</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-black">{analytics.totalLikes}</p>
-                          <p className="text-xs text-white/40">Total likes</p>
+                          <p className="text-2xl font-black text-white">{analytics.totalLikes}</p>
+                          <p className="text-xs text-[#64748B]">Total likes</p>
                         </div>
                       </div>
                     </div>
@@ -516,68 +509,67 @@ export default function AdminPage() {
                 {loading && !stats ? (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {[...Array(8)].map((_, i) => (
-                      <div key={i} className="bg-white rounded-2xl border border-[#E2E8F0] p-6 animate-pulse h-28" />
+                      <div key={i} className="glass-dark rounded-2xl border border-white/[0.06] p-6 animate-pulse h-28" />
                     ))}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     {statCards.map((s, i) => (
-                      <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                        <Card hover={false}>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-xs sm:text-sm text-[#64748B]">{s.label}</p>
-                              <p className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] mt-1">{s.value?.toLocaleString() ?? "—"}</p>
-                              {s.delta !== undefined && s.delta > 0 && (
-                                <p className="text-xs text-emerald-500 font-semibold flex items-center gap-0.5 mt-1">
-                                  <ArrowUpRight className="w-3 h-3" />+{s.delta} today
-                                </p>
-                              )}
-                            </div>
-                            <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center", s.bg)}>
-                              <s.icon className={cn("w-5 h-5 sm:w-6 sm:h-6", s.color)} />
-                            </div>
+                      <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                        whileHover={{ y: -3 }} className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs sm:text-sm text-[#64748B]">{s.label}</p>
+                            <p className="text-2xl sm:text-3xl font-black text-white mt-1">{s.value?.toLocaleString() ?? "—"}</p>
+                            {s.delta !== undefined && s.delta > 0 && (
+                              <p className="text-xs text-[#00FFA3] font-semibold flex items-center gap-0.5 mt-1">
+                                <ArrowUpRight className="w-3 h-3" />+{s.delta} today
+                              </p>
+                            )}
                           </div>
-                        </Card>
+                          <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center", s.bg)}>
+                            <s.icon className={cn("w-5 h-5 sm:w-6 sm:h-6", s.color)} />
+                          </div>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
                 )}
 
-                {/* Growth Charts + Activity */}
+                {/* Growth Charts */}
                 {analytics && (
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                    <Card hover={false}>
-                      <MiniBar data={analytics.last7Users} color="bg-blue-400" label="User Signups (7d)" />
+                    <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                      <MiniBar data={analytics.last7Users} color="bg-[#00E5FF]" label="User Signups (7d)" />
                       <div className="flex justify-between mt-2">
-                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#94A3B8]">{d}</span>)}
+                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#64748B]">{d}</span>)}
                       </div>
-                    </Card>
-                    <Card hover={false}>
-                      <MiniBar data={analytics.last7Ideas} color="bg-amber-400" label="Ideas Posted (7d)" />
+                    </div>
+                    <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                      <MiniBar data={analytics.last7Ideas} color="bg-[#FFD700]" label="Challenges Posted (7d)" />
                       <div className="flex justify-between mt-2">
-                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#94A3B8]">{d}</span>)}
+                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#64748B]">{d}</span>)}
                       </div>
-                    </Card>
-                    <Card hover={false}>
-                      <MiniBar data={analytics.last7Apps} color="bg-violet-400" label="Applications (7d)" />
+                    </div>
+                    <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                      <MiniBar data={analytics.last7Apps} color="bg-[#A855F7]" label="Applications (7d)" />
                       <div className="flex justify-between mt-2">
-                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#94A3B8]">{d}</span>)}
+                        {dayLabels.map(d => <span key={d} className="text-[10px] text-[#64748B]">{d}</span>)}
                       </div>
-                    </Card>
+                    </div>
                   </div>
                 )}
 
                 {/* Quick links */}
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
                   {tabs.slice(1).map(t => (
-                    <button key={t.id} onClick={() => setActiveTab(t.id)}
-                      className="bg-white rounded-2xl border border-[#E2E8F0] p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-2 sm:gap-3 hover:border-[#FF2D2D] hover:shadow-md transition-all cursor-pointer text-center sm:text-left">
-                      <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                    <motion.button key={t.id} whileHover={{ y: -3 }} onClick={() => setActiveTab(t.id)}
+                      className="glass-dark rounded-2xl border border-white/[0.06] p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-2 sm:gap-3 hover:border-[#FF3366]/30 transition-all cursor-pointer text-center sm:text-left">
+                      <div className="w-10 h-10 bg-gradient-hero rounded-xl flex items-center justify-center flex-shrink-0">
                         <t.icon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="font-semibold text-[#0F172A] text-xs sm:text-sm">{t.label}</span>
-                    </button>
+                      <span className="font-semibold text-white text-xs sm:text-sm">{t.label}</span>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -587,108 +579,106 @@ export default function AdminPage() {
             {activeTab === "analytics" && (
               <div>
                 {!analytics ? (
-                  <div className="p-16 text-center text-[#94A3B8]">
+                  <div className="p-16 text-center text-[#64748B]">
                     <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3" />
                     <p className="text-sm">Loading analytics...</p>
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {/* Conversion Funnel & Engagement */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                      <Card hover={false}>
-                        <h3 className="text-sm font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                          <Target className="w-4 h-4 text-[#FF2D2D]" /> Conversion Funnel
+                      <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                          <Target className="w-4 h-4 text-[#FF3366]" /> Conversion Funnel
                         </h3>
                         <div className="flex items-center justify-around">
-                          <ProgressRing value={analytics.acceptedApps} max={analytics.totalApps} label="Accept Rate" color="#10B981" />
-                          <ProgressRing value={projects.length} max={ideas.length} label="Ideas → Projects" color="#FF2D2D" />
+                          <ProgressRing value={analytics.acceptedApps} max={analytics.totalApps} label="Accept Rate" color="#00FFA3" />
+                          <ProgressRing value={projects.length} max={ideas.length} label="Challenges → Runs" color="#FF3366" />
                         </div>
-                      </Card>
-                      <Card hover={false}>
-                        <h3 className="text-sm font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-violet-500" /> Engagement
+                      </div>
+                      <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-[#A855F7]" /> Engagement
                         </h3>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Heart className="w-4 h-4 text-red-400" /> Total Likes</span>
-                            <span className="text-lg font-black text-[#0F172A]">{analytics.totalLikes.toLocaleString()}</span>
+                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Heart className="w-4 h-4 text-[#FF3366]" /> Total Likes</span>
+                            <span className="text-lg font-black text-white">{analytics.totalLikes.toLocaleString()}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Eye className="w-4 h-4 text-blue-400" /> Total Views</span>
-                            <span className="text-lg font-black text-[#0F172A]">{analytics.totalViews.toLocaleString()}</span>
+                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Eye className="w-4 h-4 text-[#00E5FF]" /> Total Views</span>
+                            <span className="text-lg font-black text-white">{analytics.totalViews.toLocaleString()}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Zap className="w-4 h-4 text-amber-400" /> Avg Apps/Idea</span>
-                            <span className="text-lg font-black text-[#0F172A]">{analytics.avgAppsPerIdea}</span>
+                            <span className="flex items-center gap-2 text-sm text-[#64748B]"><Zap className="w-4 h-4 text-[#FFD700]" /> Avg Apps/Challenge</span>
+                            <span className="text-lg font-black text-white">{analytics.avgAppsPerIdea}</span>
                           </div>
                         </div>
-                      </Card>
-                      <Card hover={false}>
-                        <h3 className="text-sm font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                          <Hash className="w-4 h-4 text-emerald-500" /> Status Distribution
+                      </div>
+                      <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                          <Hash className="w-4 h-4 text-[#00FFA3]" /> Status Distribution
                         </h3>
                         <div className="space-y-3">
-                          <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Ideas</p>
-                          <HBar label="Open" value={analytics.ideaStatuses.open} total={ideas.length} color="bg-emerald-400" />
-                          <HBar label="Full" value={analytics.ideaStatuses.full} total={ideas.length} color="bg-blue-400" />
-                          <HBar label="Closed" value={analytics.ideaStatuses.closed} total={ideas.length} color="bg-gray-300" />
-                          <p className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mt-2">Projects</p>
-                          <HBar label="Active" value={analytics.projectStatuses.active} total={projects.length} color="bg-emerald-400" />
-                          <HBar label="Completed" value={analytics.projectStatuses.completed} total={projects.length} color="bg-blue-400" />
-                          <HBar label="Paused" value={analytics.projectStatuses.paused} total={projects.length} color="bg-amber-400" />
+                          <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Challenges</p>
+                          <HBar label="Open" value={analytics.ideaStatuses.open} total={ideas.length} color="bg-[#00FFA3]" />
+                          <HBar label="Full" value={analytics.ideaStatuses.full} total={ideas.length} color="bg-[#00E5FF]" />
+                          <HBar label="Closed" value={analytics.ideaStatuses.closed} total={ideas.length} color="bg-[#64748B]" />
+                          <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider mt-2">Runs</p>
+                          <HBar label="Active" value={analytics.projectStatuses.active} total={projects.length} color="bg-[#00FFA3]" />
+                          <HBar label="Completed" value={analytics.projectStatuses.completed} total={projects.length} color="bg-[#00E5FF]" />
+                          <HBar label="Paused" value={analytics.projectStatuses.paused} total={projects.length} color="bg-[#FFD700]" />
                         </div>
-                      </Card>
+                      </div>
                     </div>
 
-                    {/* Category Breakdown + Top Performers */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <Card hover={false}>
-                        <h3 className="text-sm font-bold text-[#0F172A] mb-4 flex items-center gap-2">
-                          <PieChart className="w-4 h-4 text-amber-500" /> Idea Categories
+                      <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                          <PieChart className="w-4 h-4 text-[#FFD700]" /> Challenge Categories
                         </h3>
                         <div className="space-y-2.5">
                           {analytics.categories.map(([cat, count]) => (
-                            <HBar key={cat} label={cat} value={count} total={ideas.length} color="bg-gradient-to-r from-[#FF2D2D] to-[#FF9A3C]" />
+                            <HBar key={cat} label={cat} value={count} total={ideas.length} color="bg-gradient-to-r from-[#FF3366] to-[#A855F7]" />
                           ))}
-                          {analytics.categories.length === 0 && <p className="text-sm text-[#94A3B8]">No ideas yet</p>}
+                          {analytics.categories.length === 0 && <p className="text-sm text-[#64748B]">No challenges yet</p>}
                         </div>
-                      </Card>
+                      </div>
                       <div className="space-y-4">
-                        <Card hover={false}>
-                          <h3 className="text-sm font-bold text-[#0F172A] mb-3 flex items-center gap-2">
-                            <Award className="w-4 h-4 text-amber-500" /> Top Ideas by Likes
+                        <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                          <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <Award className="w-4 h-4 text-[#FFD700]" /> Top Challenges by Likes
                           </h3>
                           <div className="space-y-2">
                             {analytics.topIdeas.map((idea, i) => (
                               <div key={idea.id} className="flex items-center gap-3">
-                                <span className="text-xs font-black text-[#94A3B8] w-5">{i + 1}</span>
+                                <span className="text-xs font-black text-[#64748B] w-5">{i + 1}</span>
                                 <div className="flex-1 min-w-0">
-                                  <Link href={`/ideas/${idea.id}`} target="_blank" className="text-sm font-semibold text-[#0F172A] truncate block hover:text-[#FF2D2D] transition-colors">
+                                  <Link href={`/ideas/${idea.id}`} target="_blank" className="text-sm font-semibold text-white truncate block hover:text-[#FF3366] transition-colors">
                                     {idea.title}
                                   </Link>
                                 </div>
-                                <span className="text-xs font-bold text-[#FF2D2D] flex items-center gap-1"><Heart className="w-3 h-3" />{idea.likes_count}</span>
+                                <span className="text-xs font-bold text-[#FF3366] flex items-center gap-1"><Heart className="w-3 h-3" />{idea.likes_count}</span>
                               </div>
                             ))}
                           </div>
-                        </Card>
-                        <Card hover={false}>
-                          <h3 className="text-sm font-bold text-[#0F172A] mb-3 flex items-center gap-2">
-                            <Award className="w-4 h-4 text-violet-500" /> Top Users by Reputation
+                        </div>
+                        <div className="glass-dark rounded-2xl border border-white/[0.06] p-5">
+                          <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            <Award className="w-4 h-4 text-[#A855F7]" /> Top Users by Reputation
                           </h3>
                           <div className="space-y-2">
                             {analytics.topUsers.map((u, i) => (
                               <div key={u.id} className="flex items-center gap-3">
-                                <span className="text-xs font-black text-[#94A3B8] w-5">{i + 1}</span>
+                                <span className="text-xs font-black text-[#64748B] w-5">{i + 1}</span>
                                 <Avatar src={null} name={u.username} size="sm" />
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-[#0F172A] truncate">{u.username}</p>
+                                  <p className="text-sm font-semibold text-white truncate">{u.username}</p>
                                 </div>
-                                <span className="text-xs font-bold text-violet-500">⭐ {u.reputation_score}</span>
+                                <span className="text-xs font-bold text-[#A855F7]">⭐ {u.reputation_score}</span>
                               </div>
                             ))}
                           </div>
-                        </Card>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -698,70 +688,72 @@ export default function AdminPage() {
 
             {/* ── USERS ────────────────────────────────────────── */}
             {activeTab === "users" && (
-              <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-xl shadow-black/5">
-                <div className="p-4 sm:p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <h2 className="text-lg font-bold text-[#0F172A]">
-                    Users <span className="text-[#94A3B8] text-sm font-normal">({filteredUsers.length})</span>
+              <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-white/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h2 className="text-lg font-bold text-white">
+                    Users <span className="text-[#64748B] text-sm font-normal">({filteredUsers.length})</span>
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <select value={userRoleFilter} onChange={e => setUserRoleFilter(e.target.value as typeof userRoleFilter)}
-                      className="h-9 px-3 rounded-lg border border-[#E2E8F0] text-xs font-medium text-[#64748B] cursor-pointer">
+                      className="h-9 px-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-[#94A3B8] cursor-pointer">
                       <option value="all">All Roles</option>
                       <option value="admin">Admins</option>
                       <option value="user">Users</option>
                     </select>
                     <select value={userSort} onChange={e => setUserSort(e.target.value as typeof userSort)}
-                      className="h-9 px-3 rounded-lg border border-[#E2E8F0] text-xs font-medium text-[#64748B] cursor-pointer">
+                      className="h-9 px-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-[#94A3B8] cursor-pointer">
                       <option value="newest">Newest</option>
                       <option value="oldest">Oldest</option>
                       <option value="reputation">Top Reputation</option>
                     </select>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                       <input type="text" placeholder="Search…" value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="h-9 pl-9 pr-3 rounded-lg border border-[#E2E8F0] text-xs focus:outline-none focus:border-[#FF2D2D] transition-colors w-full sm:w-52" />
+                        className="h-9 pl-9 pr-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-colors w-full sm:w-52" />
                     </div>
                   </div>
                 </div>
                 {loading && users.length === 0 ? (
-                  <div className="p-8 text-center text-[#94A3B8]"><RefreshCw className="w-6 h-6 animate-spin mx-auto" /></div>
+                  <div className="p-8 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#64748B]" /></div>
                 ) : filteredUsers.length === 0 ? (
-                  <div className="p-12 text-center text-[#94A3B8]">No users found</div>
+                  <div className="p-12 text-center text-[#64748B]">No users found</div>
                 ) : (
-                  <div className="divide-y divide-[#F1F5F9]">
+                  <div className="divide-y divide-white/[0.04]">
                     {filteredUsers.map(u => (
-                      <div key={u.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#F7F7F9] transition-colors gap-2">
+                      <div key={u.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/[0.02] transition-colors gap-2">
                         <div className="flex items-center gap-3 min-w-0">
                           <Avatar src={null} name={u.username} size="sm" />
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-[#0F172A] truncate">{u.username}</p>
-                            <p className="text-xs text-[#94A3B8] truncate">{u.email}</p>
+                            <p className="text-sm font-semibold text-white truncate">{u.username}</p>
+                            <p className="text-xs text-[#64748B] truncate">{u.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-2 sm:ml-4">
-                          <Badge variant={u.role === "admin" ? "primary" : "default"}>{u.role}</Badge>
-                          <span className="text-xs text-[#94A3B8] hidden sm:block">⭐ {u.reputation_score}</span>
-                          <span className="text-xs text-[#94A3B8] hidden md:block">{timeAgo(u.created_at)}</span>
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                            u.role === "admin" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" : "bg-white/[0.03] text-[#64748B] border-white/[0.06]"
+                          )}>{u.role}</span>
+                          <span className="text-xs text-[#64748B] hidden sm:block">⭐ {u.reputation_score}</span>
+                          <span className="text-xs text-[#64748B] hidden md:block">{timeAgo(u.created_at)}</span>
                           <div className="flex gap-1">
                             <Link href={`/profile/${u.id}`} target="_blank"
-                              className="p-1.5 rounded-lg hover:bg-[#F7F7F9] transition-colors" title="View Profile">
+                              className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors" title="View Profile">
                               <ExternalLink className="w-4 h-4 text-[#64748B]" />
                             </Link>
                             {u.role !== "admin" ? (
                               <button onClick={() => promoteUser(u)} title="Promote to Admin"
-                                className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer">
-                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                className="p-1.5 rounded-lg hover:bg-[#00FFA3]/10 transition-colors cursor-pointer">
+                                <ShieldCheck className="w-4 h-4 text-[#00FFA3]" />
                               </button>
                             ) : (
                               <button onClick={() => demoteUser(u)} title="Remove Admin"
-                                className="p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer">
-                                <ShieldOff className="w-4 h-4 text-amber-500" />
+                                className="p-1.5 rounded-lg hover:bg-[#FFD700]/10 transition-colors cursor-pointer">
+                                <ShieldOff className="w-4 h-4 text-[#FFD700]" />
                               </button>
                             )}
                             <button onClick={() => deleteUser(u)} title="Delete User"
-                              className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
-                              <Trash2 className="w-4 h-4 text-red-400" />
+                              className="p-1.5 rounded-lg hover:bg-[#FF3366]/10 transition-colors cursor-pointer">
+                              <Trash2 className="w-4 h-4 text-[#FF3366]" />
                             </button>
                           </div>
                         </div>
@@ -772,69 +764,71 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* ── IDEAS ────────────────────────────────────────── */}
-            {activeTab === "ideas" && (
-              <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-xl shadow-black/5">
-                <div className="p-4 sm:p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <h2 className="text-lg font-bold text-[#0F172A]">
-                    Ideas <span className="text-[#94A3B8] text-sm font-normal">({filteredIdeas.length})</span>
+            {/* ── CHALLENGES ───────────────────────────────────── */}
+            {activeTab === "challenges" && (
+              <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-white/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h2 className="text-lg font-bold text-white">
+                    Challenges <span className="text-[#64748B] text-sm font-normal">({filteredIdeas.length})</span>
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <select value={ideaStatusFilter} onChange={e => setIdeaStatusFilter(e.target.value as typeof ideaStatusFilter)}
-                      className="h-9 px-3 rounded-lg border border-[#E2E8F0] text-xs font-medium text-[#64748B] cursor-pointer">
+                      className="h-9 px-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-[#94A3B8] cursor-pointer">
                       <option value="all">All Status</option>
                       <option value="open">Open</option>
                       <option value="full">Full</option>
                       <option value="closed">Closed</option>
                     </select>
                     <select value={ideaSort} onChange={e => setIdeaSort(e.target.value as typeof ideaSort)}
-                      className="h-9 px-3 rounded-lg border border-[#E2E8F0] text-xs font-medium text-[#64748B] cursor-pointer">
+                      className="h-9 px-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-[#94A3B8] cursor-pointer">
                       <option value="newest">Newest</option>
                       <option value="popular">Most Liked</option>
                       <option value="views">Most Viewed</option>
                     </select>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-                      <input type="text" placeholder="Search ideas…" value={searchQuery}
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+                      <input type="text" placeholder="Search challenges…" value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="h-9 pl-9 pr-3 rounded-lg border border-[#E2E8F0] text-xs focus:outline-none focus:border-[#FF2D2D] transition-colors w-full sm:w-52" />
+                        className="h-9 pl-9 pr-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-colors w-full sm:w-52" />
                     </div>
                   </div>
                 </div>
                 {loading && ideas.length === 0 ? (
-                  <div className="p-8 text-center text-[#94A3B8]"><RefreshCw className="w-6 h-6 animate-spin mx-auto" /></div>
+                  <div className="p-8 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#64748B]" /></div>
                 ) : filteredIdeas.length === 0 ? (
-                  <div className="p-12 text-center text-[#94A3B8]">No ideas found</div>
+                  <div className="p-12 text-center text-[#64748B]">No challenges found</div>
                 ) : (
-                  <div className="divide-y divide-[#F1F5F9]">
+                  <div className="divide-y divide-white/[0.04]">
                     {filteredIdeas.map(idea => (
-                      <div key={idea.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#F7F7F9] transition-colors">
+                      <div key={idea.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/[0.02] transition-colors">
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-[#0F172A] truncate">{idea.title}</p>
-                          <p className="text-xs text-[#94A3B8]">
-                            by {idea.creator_username} · {idea.category} · {idea.current_members}/{idea.max_members} members · {timeAgo(idea.created_at)}
+                          <p className="text-sm font-semibold text-white truncate">{idea.title}</p>
+                          <p className="text-xs text-[#64748B]">
+                            by {idea.creator_username} · {idea.category} · {idea.current_members}/{idea.max_members} squad · {timeAgo(idea.created_at)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 flex-shrink-0">
-                          <Badge variant={idea.status === "open" ? "success" : idea.status === "full" ? "warning" : "default"}>
-                            {idea.status}
-                          </Badge>
-                          <span className="text-[10px] text-[#94A3B8] hidden sm:flex items-center gap-0.5"><Heart className="w-3 h-3" />{idea.likes_count}</span>
-                          <span className="text-[10px] text-[#94A3B8] hidden md:flex items-center gap-0.5"><Eye className="w-3 h-3" />{idea.views_count}</span>
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                            idea.status === "open" ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" :
+                            idea.status === "full" ? "bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20" :
+                            "bg-white/[0.03] text-[#64748B] border-white/[0.06]"
+                          )}>{idea.status}</span>
+                          <span className="text-[10px] text-[#64748B] hidden sm:flex items-center gap-0.5"><Heart className="w-3 h-3" />{idea.likes_count}</span>
+                          <span className="text-[10px] text-[#64748B] hidden md:flex items-center gap-0.5"><Eye className="w-3 h-3" />{idea.views_count}</span>
                           <div className="flex gap-1">
                             <Link href={`/ideas/${idea.id}`} target="_blank"
-                              className="p-1.5 rounded-lg hover:bg-[#F7F7F9] transition-colors" title="View Idea">
+                              className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors" title="View Challenge">
                               <ExternalLink className="w-4 h-4 text-[#64748B]" />
                             </Link>
                             {idea.status === "open" && (
                               <button onClick={() => closeIdea(idea)} title="Force Close"
-                                className="p-1.5 rounded-lg hover:bg-amber-50 transition-colors cursor-pointer">
-                                <XCircle className="w-4 h-4 text-amber-500" />
+                                className="p-1.5 rounded-lg hover:bg-[#FFD700]/10 transition-colors cursor-pointer">
+                                <XCircle className="w-4 h-4 text-[#FFD700]" />
                               </button>
                             )}
-                            <button onClick={() => deleteIdea(idea)} title="Delete Idea"
-                              className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
-                              <Trash2 className="w-4 h-4 text-red-400" />
+                            <button onClick={() => deleteIdea(idea)} title="Delete Challenge"
+                              className="p-1.5 rounded-lg hover:bg-[#FF3366]/10 transition-colors cursor-pointer">
+                              <Trash2 className="w-4 h-4 text-[#FF3366]" />
                             </button>
                           </div>
                         </div>
@@ -845,51 +839,53 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* ── PROJECTS ─────────────────────────────────────── */}
-            {activeTab === "projects" && (
-              <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-xl shadow-black/5">
-                <div className="p-4 sm:p-6 border-b border-[#E2E8F0] flex items-center justify-between gap-4 flex-wrap">
-                  <h2 className="text-lg font-bold text-[#0F172A]">
-                    Projects <span className="text-[#94A3B8] text-sm font-normal">({filteredProjects.length})</span>
+            {/* ── RUNS ─────────────────────────────────────────── */}
+            {activeTab === "runs" && (
+              <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-white/[0.06] flex items-center justify-between gap-4 flex-wrap">
+                  <h2 className="text-lg font-bold text-white">
+                    Runs <span className="text-[#64748B] text-sm font-normal">({filteredProjects.length})</span>
                   </h2>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
-                    <input type="text" placeholder="Search projects…" value={searchQuery}
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+                    <input type="text" placeholder="Search runs…" value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      className="h-9 pl-9 pr-3 rounded-lg border border-[#E2E8F0] text-xs focus:outline-none focus:border-[#FF2D2D] transition-colors w-full sm:w-52" />
+                      className="h-9 pl-9 pr-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-colors w-full sm:w-52" />
                   </div>
                 </div>
                 {loading && projects.length === 0 ? (
-                  <div className="p-8 text-center text-[#94A3B8]"><RefreshCw className="w-6 h-6 animate-spin mx-auto" /></div>
+                  <div className="p-8 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#64748B]" /></div>
                 ) : filteredProjects.length === 0 ? (
-                  <div className="p-12 text-center text-[#94A3B8]">No projects found</div>
+                  <div className="p-12 text-center text-[#64748B]">No runs found</div>
                 ) : (
-                  <div className="divide-y divide-[#F1F5F9]">
+                  <div className="divide-y divide-white/[0.04]">
                     {filteredProjects.map(p => (
-                      <div key={p.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#F7F7F9] transition-colors">
+                      <div key={p.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/[0.02] transition-colors">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-hero rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                             {p.name.charAt(0)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-[#0F172A] truncate">{p.name}</p>
-                            <p className="text-xs text-[#94A3B8]">
-                              {p.member_count} members · {p.task_count} tasks · {timeAgo(p.created_at)}
+                            <p className="text-sm font-semibold text-white truncate">{p.name}</p>
+                            <p className="text-xs text-[#64748B]">
+                              {p.member_count} members · {p.task_count} missions · {timeAgo(p.created_at)}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 flex-shrink-0">
-                          <Badge variant={p.status === "active" ? "success" : p.status === "completed" ? "primary" : "default"}>
-                            {p.status}
-                          </Badge>
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                            p.status === "active" ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" :
+                            p.status === "completed" ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20" :
+                            "bg-white/[0.03] text-[#64748B] border-white/[0.06]"
+                          )}>{p.status}</span>
                           <div className="flex gap-1">
                             <Link href={`/projects/${p.id}`} target="_blank"
-                              className="p-1.5 rounded-lg hover:bg-[#F7F7F9] transition-colors" title="View Project">
+                              className="p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors" title="View Run">
                               <ExternalLink className="w-4 h-4 text-[#64748B]" />
                             </Link>
-                            <button onClick={() => deleteProject(p)} title="Delete Project"
-                              className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
-                              <Trash2 className="w-4 h-4 text-red-400" />
+                            <button onClick={() => deleteProject(p)} title="Delete Run"
+                              className="p-1.5 rounded-lg hover:bg-[#FF3366]/10 transition-colors cursor-pointer">
+                              <Trash2 className="w-4 h-4 text-[#FF3366]" />
                             </button>
                           </div>
                         </div>
@@ -902,64 +898,63 @@ export default function AdminPage() {
 
             {/* ── APPLICATIONS ─────────────────────────────────── */}
             {activeTab === "applications" && (
-              <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-xl shadow-black/5">
-                <div className="p-4 sm:p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <h2 className="text-lg font-bold text-[#0F172A]">
-                    Applications <span className="text-[#94A3B8] text-sm font-normal">({filteredApps.length})</span>
+              <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="p-4 sm:p-6 border-b border-white/[0.06] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <h2 className="text-lg font-bold text-white">
+                    Applications <span className="text-[#64748B] text-sm font-normal">({filteredApps.length})</span>
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <select value={appStatusFilter} onChange={e => setAppStatusFilter(e.target.value as typeof appStatusFilter)}
-                      className="h-9 px-3 rounded-lg border border-[#E2E8F0] text-xs font-medium text-[#64748B] cursor-pointer">
+                      className="h-9 px-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-[#94A3B8] cursor-pointer">
                       <option value="all">All Status</option>
                       <option value="pending">Pending</option>
                       <option value="accepted">Accepted</option>
                       <option value="rejected">Rejected</option>
                     </select>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                       <input type="text" placeholder="Search…" value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="h-9 pl-9 pr-3 rounded-lg border border-[#E2E8F0] text-xs focus:outline-none focus:border-[#FF2D2D] transition-colors w-full sm:w-52" />
+                        className="h-9 pl-9 pr-3 rounded-lg border border-white/[0.06] bg-white/[0.03] text-xs text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-colors w-full sm:w-52" />
                     </div>
                   </div>
                 </div>
                 {loading && applications.length === 0 ? (
-                  <div className="p-8 text-center text-[#94A3B8]"><RefreshCw className="w-6 h-6 animate-spin mx-auto" /></div>
+                  <div className="p-8 text-center"><RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#64748B]" /></div>
                 ) : filteredApps.length === 0 ? (
-                  <div className="p-12 text-center text-[#94A3B8]">No applications found</div>
+                  <div className="p-12 text-center text-[#64748B]">No applications found</div>
                 ) : (
-                  <div className="divide-y divide-[#F1F5F9]">
+                  <div className="divide-y divide-white/[0.04]">
                     {filteredApps.map(app => (
-                      <div key={app.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-[#F7F7F9] transition-colors">
+                      <div key={app.id} className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 hover:bg-white/[0.02] transition-colors">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <p className="text-sm font-semibold text-[#0F172A]">{app.username}</p>
-                            <span className="text-[#94A3B8]">→</span>
+                            <p className="text-sm font-semibold text-white">{app.username}</p>
+                            <span className="text-[#64748B]">→</span>
                             <Link href={`/ideas/${app.idea_id}`} target="_blank"
-                              className="text-sm text-[#FF2D2D] hover:underline truncate max-w-[180px]">
+                              className="text-sm text-[#FF3366] hover:underline truncate max-w-[180px]">
                               {app.idea_title}
                             </Link>
                           </div>
-                          <p className="text-xs text-[#94A3B8]">
+                          <p className="text-xs text-[#64748B]">
                             {app.role_name ?? "No role"} · Match: {app.match_score}% · {timeAgo(app.created_at)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 flex-shrink-0">
-                          <Badge variant={
-                            app.status === "accepted" ? "success" :
-                            app.status === "rejected" ? "danger" : "warning"
-                          }>
-                            {app.status}
-                          </Badge>
+                          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                            app.status === "accepted" ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" :
+                            app.status === "rejected" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" :
+                            "bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20"
+                          )}>{app.status}</span>
                           {app.status === "pending" && (
                             <div className="flex gap-1">
                               <button onClick={() => acceptApp(app)} title="Accept"
-                                className="p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer">
-                                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                className="p-1.5 rounded-lg hover:bg-[#00FFA3]/10 transition-colors cursor-pointer">
+                                <CheckCircle className="w-4 h-4 text-[#00FFA3]" />
                               </button>
                               <button onClick={() => rejectApp(app)} title="Reject"
-                                className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
-                                <XCircle className="w-4 h-4 text-red-400" />
+                                className="p-1.5 rounded-lg hover:bg-[#FF3366]/10 transition-colors cursor-pointer">
+                                <XCircle className="w-4 h-4 text-[#FF3366]" />
                               </button>
                             </div>
                           )}
@@ -974,7 +969,6 @@ export default function AdminPage() {
         </AnimatePresence>
       </div>
 
-      {/* Confirm Modal */}
       <ConfirmModal
         open={confirm.open}
         title={confirm.title}

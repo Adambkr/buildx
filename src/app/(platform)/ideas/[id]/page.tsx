@@ -370,8 +370,8 @@ export default function IdeaDetailPage({
   if (ideaLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="w-10 h-10 border-2 border-[#FF2D2D]/30 border-t-[#FF2D2D] rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-[#9CA3AF] text-sm">Loading idea…</p>
+        <div className="w-10 h-10 border-2 border-[#FF3366]/30 border-t-[#FF3366] rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-[#64748B] text-sm">Loading challenge…</p>
       </div>
     );
   }
@@ -379,57 +379,57 @@ export default function IdeaDetailPage({
   if (ideaNotFound || !idea) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <p className="text-2xl mb-2">🔍</p>
-        <h2 className="text-lg font-bold text-[#0A0A0F] mb-2">Idea not found</h2>
-        <p className="text-[#9CA3AF] text-sm mb-6">This idea may have been removed or doesn&apos;t exist.</p>
-        <Link href="/ideas" className="text-sm font-bold text-[#FF2D2D] hover:underline">← Back to Ideas</Link>
+        <div className="w-16 h-16 glass-dark rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/[0.06]">
+          <Rocket className="w-8 h-8 text-[#64748B]" />
+        </div>
+        <h2 className="text-lg font-bold text-white mb-2">Challenge not found</h2>
+        <p className="text-[#64748B] text-sm mb-6">This challenge may have been removed or doesn&apos;t exist.</p>
+        <Link href="/ideas" className="text-sm font-bold text-[#FF3366] hover:underline">← Back to Challenges</Link>
       </div>
     );
   }
 
   const isCreator = user?.id === idea.creator_id;
   const alreadyApplied = applications.some((a) => a.user_id === user?.id);
+  const fillPct = Math.round((idea.current_members / (idea.max_squad_size || 1)) * 100);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#9CA3AF] hover:text-[#0A0A0F] transition-colors mb-5 sm:mb-6 font-medium">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Ideas
+        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-white transition-colors mb-5 sm:mb-6 font-medium">
+          <ArrowLeft className="w-4 h-4" />Back to Challenges
         </Link>
 
         {/* Main Card */}
-        <div className="glass-strong rounded-3xl border border-white/80 overflow-hidden" style={{boxShadow:"0 8px 40px rgba(0,0,0,0.08)"}}>
-          {/* Category top bar */}
-          <div className="h-1.5 w-full bg-gradient-to-r from-[#FF2D2D] via-[#FF6B6B] to-[#FF9A3C]" />
+        <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#FF3366] via-[#FF6B9D] to-[#A855F7]" />
 
           {/* Header */}
           <div className="p-6 sm:p-8 pb-0">
-            <div className="flex items-start justify-between mb-6">
+            <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
                 <Avatar src={idea.creator?.avatar_url} name={idea.creator?.username || "User"} size="lg" />
                 <div>
-                  <p className="font-bold text-[#0A0A0F]">{idea.creator?.username}</p>
-                  <p className="text-sm text-[#9CA3AF]" suppressHydrationWarning>
+                  <p className="font-bold text-white">{idea.creator?.username}</p>
+                  <p className="text-sm text-[#64748B]" suppressHydrationWarning>
                     {timeAgo(idea.created_at)}
-                    {idea.category && <> · <span className="text-[#6B7280]">{idea.category}</span></>}
+                    {idea.category && <> · <span className="text-[#94A3B8]">{idea.category}</span></>}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                 <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-                  idea.status === "open" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                  idea.status === "in_progress" ? "bg-blue-50 text-blue-600 border-blue-100" :
-                  idea.status === "full" ? "bg-orange-50 text-orange-600 border-orange-100" :
-                  "bg-gray-100 text-gray-500 border-gray-200"
+                  idea.status === "open" ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" :
+                  idea.status === "in_progress" ? "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20" :
+                  idea.status === "full" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" :
+                  "bg-white/[0.03] text-[#64748B] border-white/[0.06]"
                 }`}>{idea.status === "in_progress" ? "In Progress" : idea.status}</span>
                 {user && (
-                  <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                    onClick={handleBookmark}
+                  <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={handleBookmark}
                     className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                      bookmarked ? "bg-amber-50 text-amber-500" : "bg-black/[0.03] text-[#9CA3AF] hover:text-amber-500"
+                      bookmarked ? "bg-[#FFD700]/10 text-[#FFD700]" : "bg-white/[0.03] text-[#64748B] hover:text-[#FFD700]"
                     }`}
-                    title={bookmarked ? "Remove bookmark" : "Bookmark this idea"}
+                    title={bookmarked ? "Remove bookmark" : "Bookmark"}
                   >
                     <Bookmark className="w-4 h-4" fill={bookmarked ? "currentColor" : "none"} />
                   </motion.button>
@@ -437,134 +437,141 @@ export default function IdeaDetailPage({
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] mb-4 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white mb-4 tracking-tight leading-tight">
               {idea.title}
             </h1>
 
-            {/* Difficulty + Tags */}
+            {/* Difficulty + Tags + XP */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {idea.difficulty && (
                 <span className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                  idea.difficulty === "advanced" ? "bg-red-50 text-red-600 border-red-100" :
-                  idea.difficulty === "intermediate" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                  "bg-emerald-50 text-emerald-600 border-emerald-100"
+                  idea.difficulty === "advanced" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" :
+                  idea.difficulty === "intermediate" ? "bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20" :
+                  "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20"
                 }`}>
                   <Signal className="w-3 h-3" />{idea.difficulty}
                 </span>
               )}
               {idea.tags?.map((tag) => (
-                <span key={tag} className="flex items-center gap-0.5 text-xs font-medium px-2 py-1 bg-black/[0.04] text-[#6B7280] rounded-full border border-black/[0.06]">
+                <span key={tag} className="flex items-center gap-0.5 text-xs font-medium px-2 py-1 bg-white/[0.03] text-[#64748B] rounded-full border border-white/[0.06]">
                   <Hash className="w-3 h-3" />{tag}
                 </span>
               ))}
+              {idea.xp_reward !== undefined && idea.xp_reward > 0 && (
+                <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 bg-[#FFD700]/10 text-[#FFD700] rounded-full border border-[#FFD700]/20 ml-auto">
+                  <Star className="w-3 h-3" />{idea.xp_reward} XP
+                </span>
+              )}
             </div>
 
             <div className="space-y-3 mb-6">
               {idea.description.split("\n").filter(l => l.trim()).map((line, i) => (
-                <p key={i} className="text-[#374151] leading-relaxed">{line}</p>
+                <p key={i} className="text-[#94A3B8] leading-relaxed">{line}</p>
               ))}
             </div>
+
+            {/* Skills */}
+            {idea.required_skills && idea.required_skills.length > 0 && (
+              <div className="mb-6">
+                <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-2.5">Required Skills</p>
+                <div className="flex flex-wrap gap-2">
+                  {idea.required_skills.map((skill) => (
+                    <span key={skill} className="text-xs font-medium px-3 py-1.5 bg-white/[0.03] text-[#94A3B8] rounded-xl border border-white/[0.06]">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Team Roles */}
             {roles.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-[#0A0A0F] mb-3 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#FF2D2D]" />Team Roles
-                </h3>
+                <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-2.5 flex items-center gap-2">
+                  <Zap className="w-3.5 h-3.5 text-[#FF3366]" />Team Roles
+                </p>
                 <TeamBalanceIndicator roles={roles} balance={balance} />
               </div>
             )}
           </div>
 
           {/* Stats bar */}
-          <div className="px-4 sm:px-8 py-3 bg-black/[0.02] border-t border-b border-black/[0.06] flex flex-wrap items-center justify-between gap-2">
+          <div className="px-5 sm:px-8 py-3.5 bg-white/[0.02] border-t border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-5">
-              <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                onClick={handleLike}
+              <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={handleLike}
                 className={`flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer ${
-                  liked ? "text-[#FF2D2D]" : "text-[#9CA3AF] hover:text-[#FF2D2D]"
+                  liked ? "text-[#FF3366]" : "text-[#64748B] hover:text-[#FF3366]"
                 }`}
               >
-                <Heart className="w-4 h-4" fill={liked ? "#FF2D2D" : "none"} />
-                {idea.likes_count}
+                <Heart className="w-4 h-4" fill={liked ? "currentColor" : "none"} />{idea.likes_count}
               </motion.button>
-              <span className="flex items-center gap-1.5 text-sm text-[#9CA3AF]">
+              <span className="flex items-center gap-1.5 text-sm text-[#64748B]">
                 <MessageCircle className="w-4 h-4" />{comments.length}
               </span>
-              <span className="flex items-center gap-1.5 text-sm text-[#9CA3AF]">
+              <span className="flex items-center gap-1.5 text-sm text-[#64748B]">
                 <Eye className="w-4 h-4" />{idea.views_count}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-[#374151]">{idea.current_members}/{idea.max_squad_size} members</span>
-              <div className="w-16 h-1.5 bg-black/[0.06] rounded-full overflow-hidden">
-                <div className={`h-full rounded-full bg-gradient-to-r ${
-                  idea.current_members / idea.max_squad_size >= 0.8 ? "from-orange-400 to-red-500" : "from-emerald-400 to-teal-500"
-                }`} style={{width:`${Math.round(idea.current_members/idea.max_squad_size*100)}%`}} />
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-semibold text-white">{idea.current_members}/{idea.max_squad_size}</span>
+              <div className="w-20 h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div className={`h-full rounded-full bg-gradient-to-r ${fillPct >= 80 ? "from-[#FF3366] to-[#FF6B9D]" : "from-[#00E5FF] to-[#00B4D8]"}`}
+                  style={{width:`${fillPct}%`}} />
               </div>
+              <span className="text-xs text-[#64748B]">squad</span>
             </div>
           </div>
 
           {/* Apply / Manage */}
-          <div className="px-6 sm:px-8 py-5 border-b border-black/[0.06]">
+          <div className="px-6 sm:px-8 py-5 border-b border-white/[0.06]">
             {isCreator ? (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-[#0A0A0F] flex items-center gap-2">
+                  <h3 className="font-bold text-white flex items-center gap-2">
                     Applications
-                    <span className="text-xs font-semibold px-2 py-0.5 bg-[#FFF0F0] text-[#FF2D2D] rounded-full border border-red-100">
+                    <span className="text-xs font-bold px-2 py-0.5 bg-[#FF3366]/10 text-[#FF3366] rounded-full border border-[#FF3366]/20">
                       {applications.filter((a) => a.status === "pending").length} pending
                     </span>
                   </h3>
                   {idea.current_members >= 2 && idea.status === "open" && (
-                    <motion.button
-                      whileHover={{scale:1.04,boxShadow:"0 6px 20px rgba(255,45,45,0.25)"}}
-                      whileTap={{scale:0.97}}
-                      onClick={handleStartProject}
-                      disabled={startingProject}
-                      className="flex items-center gap-1.5 gradient-bg text-white px-4 py-2 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer disabled:opacity-50"
+                    <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}} onClick={handleStartProject} disabled={startingProject}
+                      className="flex items-center gap-1.5 bg-gradient-hero text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer disabled:opacity-50"
                     >
-                      <Rocket className="w-4 h-4" />
-                      {startingProject ? "Starting…" : "Start Project"}
+                      <Rocket className="w-4 h-4" />{startingProject ? "Starting…" : "Launch Run"}
                     </motion.button>
                   )}
                 </div>
                 {applications.length === 0 ? (
-                  <p className="text-sm text-[#9CA3AF]">No applications yet.</p>
+                  <p className="text-sm text-[#64748B]">No applications yet.</p>
                 ) : (
                   <div className="space-y-2.5">
                     {[...applications].sort((a, b) => b.match_score - a.match_score).map((app) => (
-                      <div key={app.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-black/[0.02] border border-black/[0.05]">
+                      <div key={app.id} className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <Avatar src={app.user?.avatar_url} name={app.user?.username || "User"} size="sm" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-sm font-semibold text-[#0A0A0F]">{app.user?.username}</p>
+                              <p className="text-sm font-semibold text-white">{app.user?.username}</p>
                               {app.role_name && (
-                                <span className="text-xs bg-[#FFF0F0] text-[#FF2D2D] px-2 py-0.5 rounded-full font-semibold border border-red-100">{app.role_name}</span>
+                                <span className="text-xs bg-[#FF3366]/10 text-[#FF3366] px-2 py-0.5 rounded-full font-semibold border border-[#FF3366]/20">{app.role_name}</span>
                               )}
                               <span className={`flex items-center gap-0.5 text-xs font-bold ${
-                                app.match_score >= 70 ? "text-emerald-500" :
-                                app.match_score >= 40 ? "text-amber-500" : "text-[#9CA3AF]"
+                                app.match_score >= 70 ? "text-[#00FFA3]" : app.match_score >= 40 ? "text-[#FFD700]" : "text-[#64748B]"
                               }`}><Star className="w-3 h-3" />{app.match_score}%</span>
                             </div>
-                            <p className="text-xs text-[#9CA3AF] truncate mt-0.5">{app.message}</p>
+                            <p className="text-xs text-[#64748B] truncate mt-0.5">{app.message}</p>
                           </div>
                         </div>
                         {app.status === "pending" ? (
                           <div className="flex gap-1.5 flex-shrink-0">
-                            <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                              onClick={() => handleApplicationAction(app.id, "accepted")}
-                              className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer border border-emerald-100"
+                            <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={() => handleApplicationAction(app.id, "accepted")}
+                              className="p-2 bg-[#00FFA3]/10 text-[#00FFA3] rounded-xl hover:bg-[#00FFA3]/20 transition-colors cursor-pointer border border-[#00FFA3]/20"
                             ><Check className="w-4 h-4" /></motion.button>
-                            <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                              onClick={() => handleApplicationAction(app.id, "rejected")}
-                              className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors cursor-pointer border border-red-100"
+                            <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={() => handleApplicationAction(app.id, "rejected")}
+                              className="p-2 bg-[#FF3366]/10 text-[#FF3366] rounded-xl hover:bg-[#FF3366]/20 transition-colors cursor-pointer border border-[#FF3366]/20"
                             ><X className="w-4 h-4" /></motion.button>
                           </div>
                         ) : (
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                            app.status === "accepted" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                            app.status === "accepted" ? "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20" : "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20"
                           }`}>{app.status}</span>
                         )}
                       </div>
@@ -573,72 +580,69 @@ export default function IdeaDetailPage({
                 )}
               </div>
             ) : idea.status === "open" || idea.status === "in_progress" ? (
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-bold text-[#0A0A0F]">{idea.max_squad_size - idea.current_members} slots remaining</p>
-                  <p className="text-sm text-[#9CA3AF]">Apply to join this team</p>
+                  <p className="font-bold text-white">{idea.max_squad_size - idea.current_members} slots remaining</p>
+                  <p className="text-sm text-[#64748B]">Apply to join this squad</p>
                 </div>
                 {!user ? (
                   <Link href={`/login?next=/ideas/${id}`}>
-                    <motion.button whileHover={{scale:1.04,boxShadow:"0 6px 20px rgba(255,45,45,0.25)"}} whileTap={{scale:0.97}}
-                      className="gradient-bg text-white px-6 py-2.5 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer"
+                    <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}}
+                      className="bg-gradient-hero text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer"
                     >Sign in to Apply</motion.button>
                   </Link>
                 ) : alreadyApplied ? (
-                  <span className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100">
+                  <span className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 bg-[#FFD700]/10 text-[#FFD700] rounded-xl border border-[#FFD700]/20">
                     <Clock className="w-4 h-4" />Applied
                   </span>
                 ) : (
-                  <motion.button whileHover={{scale:1.04,boxShadow:"0 6px 20px rgba(255,45,45,0.25)"}} whileTap={{scale:0.97}}
-                    onClick={() => setShowApplyModal(true)}
-                    className="gradient-bg text-white px-6 py-2.5 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer"
+                  <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}} onClick={() => setShowApplyModal(true)}
+                    className="bg-gradient-hero text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer"
                   >Apply to Join</motion.button>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-[#9CA3AF] text-center py-2">This idea is no longer accepting applications.</p>
+              <p className="text-sm text-[#64748B] text-center py-2">This challenge is no longer accepting applications.</p>
             )}
           </div>
 
           {/* Comments */}
           <div className="p-6 sm:p-8">
-            <h3 className="font-bold text-[#0A0A0F] mb-5">Discussion ({comments.length})</h3>
+            <h3 className="font-bold text-white mb-5 flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-[#FF3366]" />Discussion <span className="text-[#64748B] font-normal text-sm">({comments.length})</span>
+            </h3>
             <div className="space-y-3 mb-5">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
                   <Avatar src={comment.user?.avatar_url} name={comment.user?.username || "User"} size="sm" />
-                  <div className="flex-1 bg-black/[0.02] rounded-2xl p-4 border border-black/[0.05]">
+                  <div className="flex-1 bg-white/[0.02] rounded-xl p-4 border border-white/[0.06]">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-sm font-bold text-[#0A0A0F]">{comment.user?.username}</span>
-                      <span className="text-xs text-[#9CA3AF]" suppressHydrationWarning>{timeAgo(comment.created_at)}</span>
+                      <span className="text-sm font-bold text-white">{comment.user?.username}</span>
+                      <span className="text-xs text-[#64748B]" suppressHydrationWarning>{timeAgo(comment.created_at)}</span>
                     </div>
-                    <p className="text-sm text-[#374151] leading-relaxed">{comment.content}</p>
+                    <p className="text-sm text-[#94A3B8] leading-relaxed">{comment.content}</p>
                   </div>
                 </div>
               ))}
+              {comments.length === 0 && (
+                <p className="text-sm text-[#64748B] text-center py-6">No comments yet. Start the discussion!</p>
+              )}
             </div>
 
-            {/* New Comment */}
             {user ? (
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Add a comment…"
-                  value={newComment}
+                <input type="text" placeholder="Add a comment…" value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
-                  className="w-full h-12 pl-4 pr-14 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm"
-                  style={{boxShadow:"0 2px 8px rgba(0,0,0,0.04)"}}
+                  className="w-full h-12 pl-4 pr-14 rounded-xl border border-white/[0.06] bg-white/[0.02] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 focus:ring-1 focus:ring-[#FF3366]/10 transition-all text-sm"
                 />
-                <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                  onClick={handleComment}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 gradient-bg text-white rounded-xl cursor-pointer"
+                <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={handleComment}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-hero text-white rounded-lg cursor-pointer"
                 ><Send className="w-4 h-4" /></motion.button>
               </div>
             ) : (
               <Link href={`/login?next=/ideas/${id}`}
-                className="flex items-center justify-center gap-2 h-12 rounded-2xl border border-black/[0.08] bg-white text-sm text-[#9CA3AF] hover:border-[#FF2D2D]/40 hover:text-[#FF2D2D] transition-all"
-                style={{boxShadow:"0 2px 8px rgba(0,0,0,0.04)"}}
+                className="flex items-center justify-center gap-2 h-12 rounded-xl border border-white/[0.06] bg-white/[0.02] text-sm text-[#64748B] hover:border-[#FF3366]/30 hover:text-[#FF3366] transition-all"
               >
                 <Send className="w-4 h-4" />Sign in to comment
               </Link>
@@ -648,65 +652,42 @@ export default function IdeaDetailPage({
       </motion.div>
 
       {/* Apply Modal */}
-      <Modal
-        isOpen={showApplyModal}
-        onClose={() => setShowApplyModal(false)}
-        title="Apply to Join"
-      >
+      <Modal isOpen={showApplyModal} onClose={() => setShowApplyModal(false)} title="Apply to Join">
         <div className="space-y-4">
-          {/* Role selection */}
           {roles.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-[#0F172A] mb-2">
-                Which role are you applying for?
-              </label>
+              <label className="block text-sm font-semibold text-[#94A3B8] mb-2">Which role are you applying for?</label>
               <div className="space-y-2">
                 {roles.filter((r) => r.current_count < r.required_count).map((role) => (
-                  <button
-                    key={role.id}
-                    type="button"
-                    onClick={() => setSelectedRoleId(role.id === selectedRoleId ? null : role.id)}
+                  <button key={role.id} type="button" onClick={() => setSelectedRoleId(role.id === selectedRoleId ? null : role.id)}
                     className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all cursor-pointer ${
-                      selectedRoleId === role.id
-                        ? "border-[#FF2D2D] bg-[#FFF0F0]"
-                        : "border-[#E2E8F0] hover:border-[#FF2D2D]/50"
+                      selectedRoleId === role.id ? "border-[#FF3366]/40 bg-[#FF3366]/5" : "border-white/[0.06] hover:border-[#FF3366]/30"
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#0F172A]">{role.role_name}</span>
+                      <span className="text-sm font-semibold text-white">{role.role_name}</span>
                       <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md ${
-                        role.priority === "critical" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"
+                        role.priority === "critical" ? "bg-[#FF3366]/10 text-[#FF3366]" : "bg-[#FFD700]/10 text-[#FFD700]"
                       }`}>{role.priority}</span>
                     </div>
-                    <span className="text-xs text-[#64748B]">{role.required_count - role.current_count} slot{role.required_count - role.current_count > 1 ? "s" : ""} left</span>
+                    <span className="text-xs text-[#64748B]">{role.required_count - role.current_count} left</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
-
           {applyError && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 font-medium">
+            <div className="flex items-center gap-2 p-3 bg-[#FF3366]/10 border border-[#FF3366]/20 rounded-xl text-sm text-[#FF3366] font-medium">
               <X className="w-4 h-4 flex-shrink-0" />{applyError}
             </div>
           )}
-          <p className="text-sm text-[#64748B]">
-            Tell the team why you&apos;d be a great addition.
-          </p>
+          <p className="text-sm text-[#64748B]">Tell the squad why you&apos;d be a great addition.</p>
           <textarea
-            placeholder="Share your skills, experience, and what excites you about this idea..."
-            value={applyMessage}
-            onChange={(e) => setApplyMessage(e.target.value)}
-            rows={4}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-[#E2E8F0] bg-white text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all resize-none"
+            placeholder="Share your skills, experience, and what excites you about this challenge..."
+            value={applyMessage} onChange={(e) => setApplyMessage(e.target.value)} rows={4}
+            className="w-full px-4 py-3 rounded-xl border border-white/[0.06] bg-white/[0.02] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-all resize-none text-sm"
           />
-          <Button
-            onClick={handleApply}
-            loading={applyLoading}
-            className="w-full"
-          >
-            Send Application
-          </Button>
+          <Button onClick={handleApply} loading={applyLoading} className="w-full">Send Application</Button>
         </div>
       </Modal>
     </div>

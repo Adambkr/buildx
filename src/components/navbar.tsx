@@ -14,8 +14,8 @@ import { useRouter } from "next/navigation";
 import { Avatar } from "./ui/avatar";
 
 const navLinks = [
-  { href: "/challenges", label: "Challenges", icon: Crosshair },
-  { href: "/runs", label: "My Runs", icon: Flame },
+  { href: "/ideas", label: "Challenges", icon: Crosshair },
+  { href: "/projects", label: "My Runs", icon: Flame },
   { href: "/my-work", label: "My Work", icon: Briefcase },
 ];
 

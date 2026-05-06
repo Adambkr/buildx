@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, X, Users, AlertTriangle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/lib/store";
 
@@ -131,54 +129,55 @@ export default function NewIdeaPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#9CA3AF] hover:text-[#0A0A0F] transition-colors mb-6 font-medium">
-          <ArrowLeft className="w-4 h-4" />Back to Ideas
+        <Link href="/ideas" className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-white transition-colors mb-6 font-medium">
+          <ArrowLeft className="w-4 h-4" />Back to Challenges
         </Link>
 
-        <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight mb-1">Post a New Idea</h1>
-        <p className="text-[#9CA3AF] mb-8 text-sm">Share your vision and find your dream team.</p>
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">Launch a Challenge</h1>
+        <p className="text-[#64748B] mb-8 text-sm">Share your vision and find your dream squad.</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 font-medium"
+              className="flex items-center gap-3 p-4 bg-[#FF3366]/10 border border-[#FF3366]/20 rounded-xl text-sm text-[#FF3366] font-medium"
             >
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />{error}
             </motion.div>
           )}
 
           {/* Main form card */}
-          <div className="glass-strong rounded-3xl border border-white/80 p-6 space-y-5"
-            style={{boxShadow:"0 8px 40px rgba(0,0,0,0.08)"}}>
-            <Input
-              label="Title"
-              placeholder="Give your idea a clear, catchy title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-
+          <div className="glass-dark rounded-2xl border border-white/[0.08] p-6 space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Description</label>
-              <textarea
-                placeholder="Describe your idea in detail. What problem does it solve? What's your vision?"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={5}
+              <label className="block text-sm font-bold text-white mb-1.5">Title</label>
+              <input
+                type="text"
+                placeholder="Give your challenge a clear, catchy title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm resize-none"
-                style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+                className="w-full h-11 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/40 transition-colors text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Category</label>
+              <label className="block text-sm font-bold text-white mb-1.5">Description</label>
+              <textarea
+                placeholder="Describe your challenge. What problem does it solve? What's your vision?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                required
+                className="w-full px-4 py-3 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/40 transition-colors text-sm resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-white mb-1.5">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-                className="w-full h-11 px-4 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm cursor-pointer"
-                style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+                className="w-full h-11 px-4 rounded-xl border border-white/[0.08] bg-[#0D0D12] text-white focus:outline-none focus:border-[#FF3366]/40 transition-colors text-sm cursor-pointer"
               >
                 <option value="">Select a category</option>
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
@@ -186,16 +185,16 @@ export default function NewIdeaPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Difficulty Level</label>
+              <label className="block text-sm font-bold text-white mb-1.5">Difficulty Level</label>
               <div className="flex gap-2">
                 {(["beginner", "intermediate", "advanced"] as const).map((level) => (
                   <button key={level} type="button" onClick={() => setDifficulty(level)}
-                    className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold border transition-all cursor-pointer capitalize ${
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer capitalize ${
                       difficulty === level
-                        ? level === "advanced" ? "border-red-300 bg-red-50 text-red-600"
-                          : level === "intermediate" ? "border-amber-300 bg-amber-50 text-amber-600"
-                          : "border-emerald-300 bg-emerald-50 text-emerald-600"
-                        : "border-black/[0.08] text-[#9CA3AF] hover:border-black/20"
+                        ? level === "advanced" ? "border-[#FF3366]/30 bg-[#FF3366]/10 text-[#FF3366]"
+                          : level === "intermediate" ? "border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]"
+                          : "border-[#00FFA3]/30 bg-[#00FFA3]/10 text-[#00FFA3]"
+                        : "border-white/[0.08] text-[#64748B] hover:border-white/20 hover:text-white"
                     }`}
                   >{level}</button>
                 ))}
@@ -203,7 +202,7 @@ export default function NewIdeaPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Tags</label>
+              <label className="block text-sm font-bold text-white mb-1.5">Tags</label>
               <div className="flex gap-2 mb-2">
                 <input
                   type="text"
@@ -220,36 +219,34 @@ export default function NewIdeaPage() {
                       }
                     }
                   }}
-                  className="flex-1 h-11 px-4 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm"
-                  style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+                  className="flex-1 h-11 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/40 transition-colors text-sm"
                 />
               </div>
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-black/[0.04] text-[#374151] rounded-full border border-black/[0.06]">
+                    <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-white/[0.04] text-[#94A3B8] rounded-full border border-white/[0.08]">
                       #{tag}
                       <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))}
-                        className="hover:text-red-500 cursor-pointer"
+                        className="hover:text-[#FF3366] cursor-pointer transition-colors"
                       ><X className="w-3 h-3" /></button>
                     </span>
                   ))}
                 </div>
               )}
-              <p className="text-xs text-[#9CA3AF] mt-1.5">{5 - tags.length} tags remaining</p>
+              <p className="text-xs text-[#64748B] mt-1.5">{5 - tags.length} tags remaining</p>
             </div>
           </div>
 
           {/* Role Slots Builder */}
-          <div className="glass-strong rounded-3xl border border-white/80 p-6"
-            style={{boxShadow:"0 8px 40px rgba(0,0,0,0.08)"}}>
+          <div className="glass-dark rounded-2xl border border-white/[0.08] p-6">
             <div className="flex items-center justify-between mb-4">
-              <label className="text-sm font-bold text-[#0A0A0F]">Team Roles</label>
+              <label className="text-sm font-bold text-white">Squad Roles</label>
               {maxMembers > 1 && (
-                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-black/[0.04] text-[#6B7280]">
+                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/[0.04] text-[#94A3B8] border border-white/[0.06]">
                   <Users className="w-3.5 h-3.5" />
                   {maxMembers} total
-                  {maxMembers > 10 && <span className="text-red-500 ml-0.5">— over limit!</span>}
+                  {maxMembers > 10 && <span className="text-[#FF3366] ml-0.5">— over limit!</span>}
                 </span>
               )}
             </div>
@@ -260,26 +257,27 @@ export default function NewIdeaPage() {
                 .filter((r) => !roleSlots.some((s) => s.role_name === r))
                 .map((r) => (
                   <button key={r} type="button" onClick={() => addRole(r)}
-                    className="px-2.5 py-1 text-xs rounded-full border border-black/[0.08] text-[#6B7280] hover:border-[#FF2D2D] hover:text-[#FF2D2D] hover:bg-[#FFF0F0] transition-all cursor-pointer font-medium"
+                    className="px-2.5 py-1 text-xs rounded-full border border-white/[0.08] text-[#64748B] hover:border-[#FF3366]/30 hover:text-[#FF3366] hover:bg-[#FF3366]/5 transition-all cursor-pointer font-medium"
                   >+ {r}</button>
                 ))}
             </div>
 
             {/* Custom role input */}
             <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-4">
-              <Input
+              <input
                 placeholder="Custom role name..."
                 value={roleInput}
                 onChange={(e) => setRoleInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addRole(); } }}
+                className="flex-1 h-11 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/40 transition-colors text-sm"
               />
               <select value={roleCount} onChange={(e) => setRoleCount(Number(e.target.value))}
-                className="h-11 px-3 rounded-2xl border border-black/[0.08] text-sm text-[#0A0A0F] focus:outline-none focus:border-[#FF2D2D] transition-colors cursor-pointer bg-white"
+                className="h-11 px-3 rounded-xl border border-white/[0.08] text-sm text-white bg-[#0D0D12] focus:outline-none focus:border-[#FF3366]/40 transition-colors cursor-pointer"
               >
                 {[1,2,3,4,5].map((n) => <option key={n} value={n}>{n} slot{n>1?"s":""}</option>)}
               </select>
               <select value={rolePriority} onChange={(e) => setRolePriority(e.target.value as "low"|"medium"|"critical")}
-                className="h-11 px-3 rounded-2xl border border-black/[0.08] text-sm text-[#0A0A0F] focus:outline-none focus:border-[#FF2D2D] transition-colors cursor-pointer bg-white"
+                className="h-11 px-3 rounded-xl border border-white/[0.08] text-sm text-white bg-[#0D0D12] focus:outline-none focus:border-[#FF3366]/40 transition-colors cursor-pointer"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -287,7 +285,7 @@ export default function NewIdeaPage() {
               </select>
               <motion.button whileHover={{scale:1.06}} whileTap={{scale:0.94}}
                 type="button" onClick={() => addRole()}
-                className="flex-shrink-0 w-11 h-11 gradient-bg text-white rounded-2xl flex items-center justify-center shadow-md shadow-red-200/40 cursor-pointer"
+                className="flex-shrink-0 w-11 h-11 bg-gradient-hero text-white rounded-xl flex items-center justify-center shadow-lg shadow-[#FF3366]/20 cursor-pointer"
               ><Plus className="w-4 h-4" /></motion.button>
             </div>
 
@@ -298,21 +296,21 @@ export default function NewIdeaPage() {
                   {roleSlots.map((role) => (
                     <motion.div key={role.role_name}
                       initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -10 }}
-                      className="flex items-center justify-between p-3 bg-black/[0.02] rounded-2xl border border-black/[0.05]"
+                      className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/[0.06]"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-[#0A0A0F]">{role.role_name}</span>
-                        <span className="text-xs text-[#9CA3AF] font-medium">{role.required_count} slot{role.required_count>1?"s":""}</span>
+                        <span className="text-sm font-semibold text-white">{role.role_name}</span>
+                        <span className="text-xs text-[#64748B] font-medium">{role.required_count} slot{role.required_count>1?"s":""}</span>
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${
-                          role.priority === "critical" ? "bg-red-50 text-red-500 border-red-100" :
-                          role.priority === "medium" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                          "bg-gray-100 text-gray-500 border-gray-200"
+                          role.priority === "critical" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" :
+                          role.priority === "medium" ? "bg-[#FFD700]/10 text-[#FFD700] border-[#FFD700]/20" :
+                          "bg-white/[0.04] text-[#64748B] border-white/[0.08]"
                         }`}>{role.priority}</span>
                       </div>
                       <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
                         type="button" onClick={() => removeRole(role.role_name)}
-                        className="cursor-pointer p-1.5 rounded-xl hover:bg-red-50 transition-colors"
-                      ><X className="w-3.5 h-3.5 text-[#9CA3AF] hover:text-red-500" /></motion.button>
+                        className="cursor-pointer p-1.5 rounded-xl hover:bg-[#FF3366]/10 transition-colors"
+                      ><X className="w-3.5 h-3.5 text-[#64748B] hover:text-[#FF3366]" /></motion.button>
                     </motion.div>
                   ))}
                 </div>
@@ -320,18 +318,18 @@ export default function NewIdeaPage() {
             </AnimatePresence>
 
             {roleSlots.length === 0 && (
-              <div className="flex items-center gap-2.5 p-3.5 bg-amber-50 rounded-2xl border border-amber-100">
-                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                <p className="text-xs text-amber-700 font-medium">Add at least one role to define your team structure.</p>
+              <div className="flex items-center gap-2.5 p-3.5 bg-[#FFD700]/5 rounded-xl border border-[#FFD700]/15">
+                <AlertTriangle className="w-4 h-4 text-[#FFD700] flex-shrink-0" />
+                <p className="text-xs text-[#FFD700]/80 font-medium">Add at least one role to define your squad structure.</p>
               </div>
             )}
           </div>
 
-          <motion.button whileHover={{scale:1.02, boxShadow:"0 8px 24px rgba(255,45,45,0.3)"}} whileTap={{scale:0.98}}
+          <motion.button whileHover={{scale:1.02, boxShadow:"0 8px 30px rgba(255,51,102,0.3)"}} whileTap={{scale:0.98}}
             type="submit" disabled={loading}
-            className="w-full gradient-bg text-white py-4 rounded-2xl font-black text-base shadow-lg shadow-red-200/40 cursor-pointer disabled:opacity-60 tracking-wide"
+            className="w-full bg-gradient-hero text-white py-4 rounded-xl font-black text-base shadow-lg shadow-[#FF3366]/20 cursor-pointer disabled:opacity-60 tracking-wide"
           >
-            {loading ? "Publishing…" : "✦ Publish Idea"}
+            {loading ? "Publishing…" : "✦ Launch Challenge"}
           </motion.button>
         </form>
       </motion.div>

@@ -18,10 +18,9 @@ export function Card({ children, className, hover = true, onClick }: CardProps) 
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onClick={onClick}
       className={cn(
-        "bg-white rounded-2xl border border-[#E2E8F0] p-6",
-        "shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
-        hover && "hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] cursor-pointer",
-        "transition-shadow duration-300",
+        "glass-dark rounded-2xl border border-white/[0.08] p-6",
+        hover && "hover:border-white/[0.12] cursor-pointer",
+        "transition-all duration-300",
         className
       )}
     >

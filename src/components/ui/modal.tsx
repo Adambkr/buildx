@@ -44,22 +44,21 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="relative w-full sm:max-w-lg glass-strong rounded-t-3xl sm:rounded-3xl border border-white/80 p-5 sm:p-8 z-10 max-h-[90vh] overflow-y-auto"
-            style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}
+            className="relative w-full sm:max-w-lg glass-dark rounded-t-2xl sm:rounded-2xl border border-white/[0.08] p-5 sm:p-8 z-10 max-h-[90vh] overflow-y-auto shadow-2xl shadow-black/60"
           >
             {/* Drag handle indicator for mobile */}
             <div className="sm:hidden flex justify-center mb-3">
-              <div className="w-10 h-1 bg-black/10 rounded-full" />
+              <div className="w-10 h-1 bg-white/10 rounded-full" />
             </div>
             <div className="flex items-center justify-between mb-5">
               {title && (
-                <h2 className="text-lg sm:text-xl font-bold text-[#0A0A0F]">{title}</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white">{title}</h2>
               )}
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-black/[0.05] transition-colors cursor-pointer ml-auto"
+                className="p-2 rounded-xl hover:bg-white/[0.06] transition-colors cursor-pointer ml-auto"
               >
-                <X className="w-5 h-5 text-[#9CA3AF]" />
+                <X className="w-5 h-5 text-[#64748B] hover:text-white transition-colors" />
               </button>
             </div>
             {children}
