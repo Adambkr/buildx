@@ -10,8 +10,8 @@ export async function DELETE(
     const { id } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc("admin_delete_idea", {
-      p_idea_id: id,
+    const { data, error } = await supabase.rpc("admin_delete_challenge", {
+      p_challenge_id: id,
     });
 
     if (error) {

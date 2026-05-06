@@ -125,7 +125,7 @@ export default function PlatformLayout({
   return (
     <>
       <Navbar />
-      <main className="flex-1 bg-[#FAFAFA] min-h-screen pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 bg-[#050507] min-h-screen pb-20 md:pb-0">{children}</main>
       <MobileBottomNav />
     </>
   );

@@ -17,7 +17,7 @@ export async function POST(
 
     const { data, error } = await supabase.rpc("add_comment", {
       p_content: body.content.trim(),
-      p_idea_id: id,
+      p_challenge_id: id,
     });
 
     if (error) {
@@ -44,7 +44,7 @@ export async function GET(
     const { data, error } = await supabase
       .from("comments")
       .select("*, user:users!comments_user_id_fkey(*)")
-      .eq("idea_id", id)
+      .eq("challenge_id", id)
       .order("created_at", { ascending: true });
 
     if (error) {

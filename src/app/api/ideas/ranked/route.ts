@@ -10,8 +10,8 @@ export async function GET(request: Request) {
   const supabase = await createClient();
 
   const { data: ideas, error } = await supabase
-    .from("ideas")
-    .select("*, creator:users!ideas_creator_id_fkey(*)")
+    .from("challenges")
+    .select("*, creator:users!challenges_creator_id_fkey(*)")
     .eq("status", "open")
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -56,8 +56,8 @@ export async function GET(request: Request) {
 
     // Urgency score (0-100) — higher when almost full
     const urgency =
-      idea.max_members > 0
-        ? (idea.current_members / idea.max_members) * 100
+      idea.max_squad_size > 0
+        ? (idea.current_members / idea.max_squad_size) * 100
         : 0;
 
     // Skill match score (0-100)
@@ -99,8 +99,8 @@ export async function GET(request: Request) {
     case "almost-full":
       sorted = scored.sort(
         (a, b) =>
-          b.current_members / b.max_members -
-          a.current_members / a.max_members
+          b.current_members / b.max_squad_size -
+          a.current_members / a.max_squad_size
       );
       break;
     case "for-you":

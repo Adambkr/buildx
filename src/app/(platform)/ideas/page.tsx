@@ -2,12 +2,11 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus, Search, Crosshair, Flame } from "lucide-react";
 import { IdeaFeed } from "@/components/ideas/idea-feed";
 import { useState } from "react";
 
-export default function IdeasPage() {
+export default function ChallengesPage() {
   const [search, setSearch] = useState("");
 
   return (
@@ -19,21 +18,24 @@ export default function IdeasPage() {
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6"
       >
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight">
-            Discover Ideas
-          </h1>
-          <p className="text-[#6B7280] mt-1 text-sm">
-            Find your next project and join a team
+          <div className="flex items-center gap-2 mb-1">
+            <Crosshair className="w-5 h-5 text-[#FF3366]" />
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Discover Challenges
+            </h1>
+          </div>
+          <p className="text-[#64748B] mt-1 text-sm">
+            Find your next mission and assemble your squad
           </p>
         </div>
         <Link href="/ideas/new">
           <motion.button
-            whileHover={{ scale: 1.04, boxShadow: "0 6px 20px rgba(255,45,45,0.25)" }}
+            whileHover={{ scale: 1.04, boxShadow: "0 6px 20px rgba(255,51,102,0.25)" }}
             whileTap={{ scale: 0.97 }}
-            className="gradient-bg text-white px-5 py-2.5 rounded-2xl font-semibold text-sm flex items-center gap-2 shadow-md shadow-red-200/40 cursor-pointer"
+            className="bg-gradient-hero text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 shadow-lg shadow-[#FF3366]/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Post an Idea
+            Launch Challenge
           </motion.button>
         </Link>
       </motion.div>
@@ -45,14 +47,13 @@ export default function IdeasPage() {
         transition={{ delay: 0.1 }}
         className="relative mb-5 sm:mb-8"
       >
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-[#9CA3AF]" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
         <input
           type="text"
-          placeholder="Search ideas by title, skills, or category…"
+          placeholder="Search challenges by title, skills, or category…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full h-12 pl-11 pr-4 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm"
-          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+          className="w-full h-12 pl-11 pr-4 rounded-xl border border-white/[0.06] bg-white/[0.03] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 focus:ring-1 focus:ring-[#FF3366]/10 transition-all text-sm"
         />
       </motion.div>
 

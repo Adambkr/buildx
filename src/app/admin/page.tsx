@@ -177,8 +177,8 @@ export default function AdminPage() {
       const [statsRes, usersRes, ideasRes, projectsRes, appsRes] = await Promise.allSettled([
         supabase.rpc("admin_get_stats"),
         supabase.rpc("admin_get_users", { p_limit: 500, p_offset: 0 }),
-        supabase.rpc("admin_get_ideas", { p_limit: 500, p_offset: 0 }),
-        supabase.rpc("admin_get_projects", { p_limit: 500, p_offset: 0 }),
+        supabase.rpc("admin_get_challenges", { p_limit: 500, p_offset: 0 }),
+        supabase.rpc("admin_get_runs", { p_limit: 500, p_offset: 0 }),
         supabase.rpc("admin_get_applications", { p_limit: 500, p_offset: 0 }),
       ]);
       if (statsRes.status === "fulfilled" && statsRes.value.data) setStats(statsRes.value.data as StatsData);
@@ -226,7 +226,7 @@ export default function AdminPage() {
   const deleteIdea = (idea: AdminIdea) => ask(
     "Delete Idea", `Permanently delete "${idea.title}"?`,
     async () => {
-      await createClient().rpc("admin_delete_idea", { p_idea_id: idea.id });
+      await createClient().rpc("admin_delete_challenge", { p_challenge_id: idea.id });
       setIdeas(prev => prev.filter(x => x.id !== idea.id));
     }
   );
@@ -234,7 +234,7 @@ export default function AdminPage() {
   const closeIdea = (idea: AdminIdea) => ask(
     "Force Close Idea", `Close "${idea.title}" and reject all pending applications?`,
     async () => {
-      await createClient().rpc("admin_close_idea", { p_idea_id: idea.id });
+      await createClient().rpc("admin_close_challenge", { p_challenge_id: idea.id });
       setIdeas(prev => prev.map(x => x.id === idea.id ? { ...x, status: "closed" } : x));
     }
   );
@@ -243,7 +243,7 @@ export default function AdminPage() {
   const deleteProject = (p: AdminProject) => ask(
     "Delete Project", `Permanently delete project "${p.name}"? All tasks and members will be removed.`,
     async () => {
-      await createClient().rpc("admin_delete_project", { p_project_id: p.id });
+      await createClient().rpc("admin_delete_run", { p_run_id: p.id });
       setProjects(prev => prev.filter(x => x.id !== p.id));
     }
   );

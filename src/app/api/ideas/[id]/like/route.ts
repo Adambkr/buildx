@@ -10,8 +10,8 @@ export async function POST(
     const { id } = await params;
     const supabase = await createClient();
 
-    const { data, error } = await supabase.rpc("toggle_idea_like", {
-      p_idea_id: id,
+    const { data, error } = await supabase.rpc("toggle_challenge_like", {
+      p_challenge_id: id,
     });
 
     if (error) {

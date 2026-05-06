@@ -20,9 +20,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "BuildX — Turn Ideas Into Real Projects",
+  title: "BuildX — Gamified Challenge Platform",
   description:
-    "Post ideas, build exclusive teams of up to 10, and launch real projects together. The next-generation collaboration platform for builders.",
+    "Discover challenges, assemble squads, complete missions, and showcase your wins. The next-generation gamified collaboration platform for builders.",
 };
 
 export default function RootLayout({
@@ -33,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-white text-[#0F172A]">
+      <body className="min-h-full flex flex-col bg-[#050507] text-white">
         {children}
       </body>
     </html>

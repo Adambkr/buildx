@@ -14,6 +14,10 @@ import {
   Clock,
   Star,
   Zap,
+  Bookmark,
+  Rocket,
+  Signal,
+  Hash,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -29,10 +33,10 @@ import { TeamBalanceIndicator } from "@/components/ideas/team-balance-indicator"
 import type { Idea, Comment, IdeaApplication, IdeaRole, TeamBalanceScore } from "@/lib/types";
 
 const demoRoles: IdeaRole[] = [
-  { id: "r1", idea_id: "1", role_name: "Frontend Developer", required_count: 2, current_count: 1, priority: "critical", created_at: "" },
-  { id: "r2", idea_id: "1", role_name: "Backend Developer", required_count: 1, current_count: 0, priority: "critical", created_at: "" },
-  { id: "r3", idea_id: "1", role_name: "UI/UX Designer", required_count: 1, current_count: 1, priority: "medium", created_at: "" },
-  { id: "r4", idea_id: "1", role_name: "ML Engineer", required_count: 1, current_count: 0, priority: "medium", created_at: "" },
+  { id: "r1", challenge_id: "1", role_name: "Frontend Developer", required_count: 2, current_count: 1, priority: "critical", created_at: "" },
+  { id: "r2", challenge_id: "1", role_name: "Backend Developer", required_count: 1, current_count: 0, priority: "critical", created_at: "" },
+  { id: "r3", challenge_id: "1", role_name: "UI/UX Designer", required_count: 1, current_count: 1, priority: "medium", created_at: "" },
+  { id: "r4", challenge_id: "1", role_name: "ML Engineer", required_count: 1, current_count: 0, priority: "medium", created_at: "" },
 ];
 
 // Demo idea for when Supabase isn't connected
@@ -43,8 +47,13 @@ const demoIdea: Idea = {
   description:
     "We're building an intelligent study app that uses AI to create personalized learning paths, generate flashcards from notes, and adapt to each student's learning pace.\n\nThe app will feature:\n- Smart note summarization\n- Adaptive quizzes that focus on weak areas\n- Collaboration tools for study groups\n- Progress analytics and insights\n\nWe need passionate people who care about education and want to make learning more accessible.",
   category: "Education",
+  difficulty: "intermediate",
+  tags: ["ai", "education", "study"],
   required_skills: ["React", "Python", "Machine Learning", "UI/UX", "Node.js"],
-  max_members: 8,
+  duration: "2_weeks",
+  xp_reward: 500,
+  badge_reward: "AI Architect",
+  max_squad_size: 8,
   current_members: 5,
   status: "open",
   likes_count: 124,
@@ -62,6 +71,8 @@ const demoIdea: Idea = {
     skills: ["React", "Python", "TensorFlow"],
     role: "user",
     reputation_score: 85,
+    xp: 1020,
+    level: 5,
     created_at: "",
   },
 };
@@ -70,7 +81,7 @@ const demoComments: Comment[] = [
   {
     id: "c1",
     post_id: null,
-    idea_id: "1",
+    challenge_id: "1",
     user_id: "demo-2",
     content: "Love this idea! The adaptive quiz feature sounds really promising.",
     created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
@@ -83,13 +94,15 @@ const demoComments: Comment[] = [
       skills: [],
       role: "user",
       reputation_score: 72,
+      xp: 864,
+      level: 4,
       created_at: "",
     },
   },
   {
     id: "c2",
     post_id: null,
-    idea_id: "1",
+    challenge_id: "1",
     user_id: "demo-3",
     content:
       "I have experience with spaced repetition algorithms. Would love to contribute!",
@@ -103,6 +116,8 @@ const demoComments: Comment[] = [
       skills: [],
       role: "user",
       reputation_score: 67,
+      xp: 804,
+      level: 4,
       created_at: "",
     },
   },
@@ -128,6 +143,8 @@ export default function IdeaDetailPage({
   const [applyMessage, setApplyMessage] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [startingProject, setStartingProject] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
   const [applyError, setApplyError] = useState("");
 
@@ -137,8 +154,8 @@ export default function IdeaDetailPage({
       try {
         const supabase = createClient();
         const { data, error } = await supabase
-          .from("ideas")
-          .select("*, creator:users!ideas_creator_id_fkey(*)")
+          .from("challenges")
+          .select("*, creator:users!challenges_creator_id_fkey(*)")
           .eq("id", id)
           .single();
 
@@ -146,42 +163,49 @@ export default function IdeaDetailPage({
         setIdea(data);
 
         // Increment view count (fire-and-forget)
-        supabase.rpc("increment_idea_views", { p_idea_id: id }).then(() => {});
+        supabase.rpc("increment_challenge_views", { p_challenge_id: id }).then(() => {});
 
         const { data: commentsData } = await supabase
           .from("comments")
           .select("*, user:users!comments_user_id_fkey(*)")
-          .eq("idea_id", id)
+          .eq("challenge_id", id)
           .order("created_at", { ascending: true });
 
         if (commentsData) setComments(commentsData);
 
         const { data: rolesData } = await supabase
-          .from("idea_roles")
+          .from("challenge_roles")
           .select("*")
-          .eq("idea_id", id)
+          .eq("challenge_id", id)
           .order("priority", { ascending: true });
         if (rolesData) setRoles(rolesData);
 
-        const { data: balanceData } = await supabase.rpc("get_team_balance_score", { p_idea_id: id });
+        const { data: balanceData } = await supabase.rpc("get_team_balance_score", { p_challenge_id: id });
         if (balanceData) setBalance(balanceData as TeamBalanceScore);
 
         if (user) {
-          const { data: appsData } = await supabase
-            .from("idea_applications")
-            .select("*, user:users!idea_applications_user_id_fkey(*)")
-            .eq("idea_id", id)
-            .order("match_score", { ascending: false });
-          if (appsData) setApplications(appsData);
-
-          // Check if user already liked this idea
-          const { data: likeData } = await supabase
-            .from("idea_likes")
-            .select("id")
-            .eq("idea_id", id)
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (likeData) setLiked(true);
+          const [appsRes, likeRes, bookmarkRes] = await Promise.all([
+            supabase
+              .from("challenge_applications")
+              .select("*, user:users!challenge_applications_user_id_fkey(*)")
+              .eq("challenge_id", id)
+              .order("match_score", { ascending: false }),
+            supabase
+              .from("challenge_likes")
+              .select("id")
+              .eq("challenge_id", id)
+              .eq("user_id", user.id)
+              .maybeSingle(),
+            supabase
+              .from("bookmarks")
+              .select("id")
+              .eq("challenge_id", id)
+              .eq("user_id", user.id)
+              .maybeSingle(),
+          ]);
+          if (appsRes.data) setApplications(appsRes.data);
+          if (likeRes.data) setLiked(true);
+          if (bookmarkRes.data) setBookmarked(true);
         }
       } catch {
         setIdeaNotFound(true);
@@ -192,6 +216,35 @@ export default function IdeaDetailPage({
 
     fetchIdea();
   }, [id, user]);
+
+  const handleBookmark = async () => {
+    if (!user) return;
+    const newState = !bookmarked;
+    setBookmarked(newState);
+    try {
+      const supabase = createClient();
+      await supabase.rpc("toggle_bookmark", { p_challenge_id: id });
+    } catch {
+      setBookmarked(!newState);
+    }
+  };
+
+  const handleStartProject = async () => {
+    if (!user || !idea) return;
+    setStartingProject(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.rpc("start_run_early", { p_challenge_id: idea.id });
+      if (error) throw error;
+      if (data?.run_id) {
+        router.push(`/projects/${data.run_id}`);
+      }
+    } catch (err: any) {
+      alert(err?.message || "Failed to start project");
+    } finally {
+      setStartingProject(false);
+    }
+  };
 
   const handleLike = async () => {
     if (!user) return;
@@ -205,7 +258,7 @@ export default function IdeaDetailPage({
     }
     try {
       const supabase = createClient();
-      await supabase.rpc("toggle_idea_like", { p_idea_id: id });
+      await supabase.rpc("toggle_challenge_like", { p_challenge_id: id });
     } catch {
       // Revert on failure
       setLiked(!newLiked);
@@ -224,7 +277,7 @@ export default function IdeaDetailPage({
     const comment: Comment = {
       id: crypto.randomUUID(),
       post_id: null,
-      idea_id: id,
+      challenge_id: id,
       user_id: user.id,
       content: newComment,
       created_at: new Date().toISOString(),
@@ -238,7 +291,7 @@ export default function IdeaDetailPage({
       const supabase = createClient();
       await supabase.rpc("add_comment", {
         p_content: newComment,
-        p_idea_id: id,
+        p_challenge_id: id,
       });
     } catch {
       // Comment added optimistically
@@ -252,8 +305,8 @@ export default function IdeaDetailPage({
 
     try {
       const supabase = createClient();
-      const { error: rpcError } = await supabase.rpc("apply_to_idea", {
-        p_idea_id: idea.id,
+      const { error: rpcError } = await supabase.rpc("apply_to_challenge", {
+        p_challenge_id: idea.id,
         p_message: applyMessage,
         p_role_id: selectedRoleId ?? null,
       });
@@ -261,7 +314,7 @@ export default function IdeaDetailPage({
       // Optimistically mark as applied
       setApplications((prev) => [...prev, {
         id: crypto.randomUUID(),
-        idea_id: idea.id,
+        challenge_id: idea.id,
         user_id: user.id,
         role_id: selectedRoleId,
         role_name: null,
@@ -299,7 +352,7 @@ export default function IdeaDetailPage({
         });
         if (idea) {
           const newCount = idea.current_members + 1;
-          setIdea({ ...idea, current_members: newCount, status: newCount >= idea.max_members ? "full" : idea.status });
+          setIdea({ ...idea, current_members: newCount, status: newCount >= idea.max_squad_size ? "full" : idea.status });
         }
         if (data?.project_created) {
           router.push(`/projects/${data.project_id}`);
@@ -363,16 +416,48 @@ export default function IdeaDetailPage({
                   </p>
                 </div>
               </div>
-              <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-                idea.status === "open" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                idea.status === "full" ? "bg-orange-50 text-orange-600 border-orange-100" :
-                "bg-gray-100 text-gray-500 border-gray-200"
-              }`}>{idea.status}</span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
+                  idea.status === "open" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                  idea.status === "in_progress" ? "bg-blue-50 text-blue-600 border-blue-100" :
+                  idea.status === "full" ? "bg-orange-50 text-orange-600 border-orange-100" :
+                  "bg-gray-100 text-gray-500 border-gray-200"
+                }`}>{idea.status === "in_progress" ? "In Progress" : idea.status}</span>
+                {user && (
+                  <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
+                    onClick={handleBookmark}
+                    className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                      bookmarked ? "bg-amber-50 text-amber-500" : "bg-black/[0.03] text-[#9CA3AF] hover:text-amber-500"
+                    }`}
+                    title={bookmarked ? "Remove bookmark" : "Bookmark this idea"}
+                  >
+                    <Bookmark className="w-4 h-4" fill={bookmarked ? "currentColor" : "none"} />
+                  </motion.button>
+                )}
+              </div>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] mb-4 tracking-tight leading-tight">
               {idea.title}
             </h1>
+
+            {/* Difficulty + Tags */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {idea.difficulty && (
+                <span className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                  idea.difficulty === "advanced" ? "bg-red-50 text-red-600 border-red-100" :
+                  idea.difficulty === "intermediate" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                  "bg-emerald-50 text-emerald-600 border-emerald-100"
+                }`}>
+                  <Signal className="w-3 h-3" />{idea.difficulty}
+                </span>
+              )}
+              {idea.tags?.map((tag) => (
+                <span key={tag} className="flex items-center gap-0.5 text-xs font-medium px-2 py-1 bg-black/[0.04] text-[#6B7280] rounded-full border border-black/[0.06]">
+                  <Hash className="w-3 h-3" />{tag}
+                </span>
+              ))}
+            </div>
 
             <div className="space-y-3 mb-6">
               {idea.description.split("\n").filter(l => l.trim()).map((line, i) => (
@@ -411,11 +496,11 @@ export default function IdeaDetailPage({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-[#374151]">{idea.current_members}/{idea.max_members} members</span>
+              <span className="text-sm font-semibold text-[#374151]">{idea.current_members}/{idea.max_squad_size} members</span>
               <div className="w-16 h-1.5 bg-black/[0.06] rounded-full overflow-hidden">
                 <div className={`h-full rounded-full bg-gradient-to-r ${
-                  idea.current_members / idea.max_members >= 0.8 ? "from-orange-400 to-red-500" : "from-emerald-400 to-teal-500"
-                }`} style={{width:`${Math.round(idea.current_members/idea.max_members*100)}%`}} />
+                  idea.current_members / idea.max_squad_size >= 0.8 ? "from-orange-400 to-red-500" : "from-emerald-400 to-teal-500"
+                }`} style={{width:`${Math.round(idea.current_members/idea.max_squad_size*100)}%`}} />
               </div>
             </div>
           </div>
@@ -424,12 +509,26 @@ export default function IdeaDetailPage({
           <div className="px-6 sm:px-8 py-5 border-b border-black/[0.06]">
             {isCreator ? (
               <div>
-                <h3 className="font-bold text-[#0A0A0F] mb-4 flex items-center gap-2">
-                  Applications
-                  <span className="text-xs font-semibold px-2 py-0.5 bg-[#FFF0F0] text-[#FF2D2D] rounded-full border border-red-100">
-                    {applications.filter((a) => a.status === "pending").length} pending
-                  </span>
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-[#0A0A0F] flex items-center gap-2">
+                    Applications
+                    <span className="text-xs font-semibold px-2 py-0.5 bg-[#FFF0F0] text-[#FF2D2D] rounded-full border border-red-100">
+                      {applications.filter((a) => a.status === "pending").length} pending
+                    </span>
+                  </h3>
+                  {idea.current_members >= 2 && idea.status === "open" && (
+                    <motion.button
+                      whileHover={{scale:1.04,boxShadow:"0 6px 20px rgba(255,45,45,0.25)"}}
+                      whileTap={{scale:0.97}}
+                      onClick={handleStartProject}
+                      disabled={startingProject}
+                      className="flex items-center gap-1.5 gradient-bg text-white px-4 py-2 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer disabled:opacity-50"
+                    >
+                      <Rocket className="w-4 h-4" />
+                      {startingProject ? "Starting…" : "Start Project"}
+                    </motion.button>
+                  )}
+                </div>
                 {applications.length === 0 ? (
                   <p className="text-sm text-[#9CA3AF]">No applications yet.</p>
                 ) : (
@@ -473,10 +572,10 @@ export default function IdeaDetailPage({
                   </div>
                 )}
               </div>
-            ) : idea.status === "open" ? (
+            ) : idea.status === "open" || idea.status === "in_progress" ? (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-[#0A0A0F]">{idea.max_members - idea.current_members} slots remaining</p>
+                  <p className="font-bold text-[#0A0A0F]">{idea.max_squad_size - idea.current_members} slots remaining</p>
                   <p className="text-sm text-[#9CA3AF]">Apply to join this team</p>
                 </div>
                 {!user ? (

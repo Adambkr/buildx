@@ -11,8 +11,8 @@ export async function POST(
     const supabase = await createClient();
     const body = await request.json();
 
-    const { data, error } = await supabase.rpc("apply_to_idea", {
-      p_idea_id: id,
+    const { data, error } = await supabase.rpc("apply_to_challenge", {
+      p_challenge_id: id,
       p_message: body.message || "",
       p_role_id: body.role_id ?? null,
     });

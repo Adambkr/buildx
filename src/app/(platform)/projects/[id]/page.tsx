@@ -6,690 +6,464 @@ import {
   ArrowLeft, Plus, Send, CheckCircle2, Circle, Clock,
   Users, ListTodo, MessageSquare, BarChart3, Zap,
   Flag, Activity, Target, ChevronRight, UserCheck,
+  Trophy, Swords, Crosshair, Flame, Star, Rocket
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { cn, timeAgo } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useAppStore } from "@/lib/store";
-import type { Project, Task, Milestone, ActivityFeedItem, ProjectMember, Post } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import type { Project, Task, Milestone, Phase, ActivityFeedItem, ProjectMember, SquadMember, Post } from "@/lib/types";
 
-type Tab = "overview" | "tasks" | "milestones" | "chat" | "members" | "activity";
+type Tab = "overview" | "missions" | "phases" | "chat" | "squad" | "activity";
 
-const demoMilestones: Milestone[] = [
-  { id: "m1", project_id: "p1", title: "Planning", description: "Define scope and requirements", status: "completed", sort_order: 0, created_at: "", updated_at: "" },
-  { id: "m2", project_id: "p1", title: "Design", description: "UI/UX wireframes and mockups", status: "active", sort_order: 1, created_at: "", updated_at: "" },
-  { id: "m3", project_id: "p1", title: "Development", description: "Core feature implementation", status: "not_started", sort_order: 2, created_at: "", updated_at: "" },
-  { id: "m4", project_id: "p1", title: "Testing", description: "QA and bug fixes", status: "not_started", sort_order: 3, created_at: "", updated_at: "" },
-  { id: "m5", project_id: "p1", title: "Launch", description: "Deploy and go live", status: "not_started", sort_order: 4, created_at: "", updated_at: "" },
+const demoPhases: Milestone[] = [
+  { id: "m1", run_id: "p1", title: "Planning", description: "Define scope and requirements", status: "completed", sort_order: 0, created_at: "", updated_at: "" },
+  { id: "m2", run_id: "p1", title: "Design", description: "UI/UX wireframes and mockups", status: "active", sort_order: 1, created_at: "", updated_at: "" },
+  { id: "m3", run_id: "p1", title: "Development", description: "Core feature implementation", status: "not_started", sort_order: 2, created_at: "", updated_at: "" },
+  { id: "m4", run_id: "p1", title: "Testing", description: "QA and bug fixes", status: "not_started", sort_order: 3, created_at: "", updated_at: "" },
+  { id: "m5", run_id: "p1", title: "Launch", description: "Deploy and go live", status: "not_started", sort_order: 4, created_at: "", updated_at: "" },
 ];
 
 const demoActivity: ActivityFeedItem[] = [
-  { id: "a1", project_id: "p1", user_id: "demo-1", type: "task_completed", message: "sarahkim completed \"Design UI mockups in Figma\"", created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
-  { id: "a2", project_id: "p1", user_id: "demo-2", type: "task_started", message: "jamesliu started \"Set up database schema\"", created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-  { id: "a3", project_id: "p1", user_id: "demo-1", type: "milestone_completed", message: "Planning milestone completed 🎉", created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-  { id: "a4", project_id: "p1", user_id: "demo-3", type: "member_joined", message: "priyapatel joined the project", created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+  { id: "a1", run_id: "p1", user_id: "demo-1", type: "mission_completed", message: "sarahkim completed \"Design UI mockups in Figma\"", created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+  { id: "a2", run_id: "p1", user_id: "demo-2", type: "mission_started", message: "jamesliu started \"Set up database schema\"", created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+  { id: "a3", run_id: "p1", user_id: "demo-1", type: "phase_completed", message: "Planning phase completed 🎉", created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
+  { id: "a4", run_id: "p1", user_id: "demo-3", type: "squad_joined", message: "priyapatel joined the squad", created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
 ];
 
-const demoTasks: Task[] = [
-  {
-    id: "t1",
-    project_id: "p1",
-    title: "Design UI mockups in Figma",
-    description: "Create high-fidelity mockups for the main screens",
-    milestone_id: null,
-    completed: true,
-    status: "done",
-    assigned_to: "demo-1",
-    priority: "high",
-    deadline: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "t2",
-    project_id: "p1",
-    title: "Set up database schema",
-    description: "Design and implement the PostgreSQL schema",
-    milestone_id: null,
-    completed: false,
-    status: "in_progress",
-    assigned_to: "demo-2",
-    priority: "high",
-    deadline: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "t3",
-    project_id: "p1",
-    title: "Implement authentication flow",
-    description: "Email/password + OAuth setup",
-    milestone_id: null,
-    completed: false,
-    status: "todo",
-    assigned_to: null,
-    priority: "medium",
-    deadline: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "t4",
-    project_id: "p1",
-    title: "Build AI quiz generator",
-    description: "ML model for adaptive quiz generation",
-    milestone_id: null,
-    completed: false,
-    status: "todo",
-    assigned_to: null,
-    priority: "medium",
-    deadline: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "t5",
-    project_id: "p1",
-    title: "Deploy to production",
-    description: "Set up CI/CD and deploy",
-    milestone_id: null,
-    completed: false,
-    status: "todo",
-    assigned_to: null,
-    priority: "low",
-    deadline: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
+const demoMissions: Task[] = [
+  { id: "t1", run_id: "p1", title: "Design UI mockups in Figma", description: "Create high-fidelity mockups for the main screens", phase_id: null, status: "completed", priority: "high", assigned_to: "demo-1", xp_value: 50, deadline: null, created_at: "", updated_at: "" },
+  { id: "t2", run_id: "p1", title: "Set up database schema", description: "Design PostgreSQL schema with Prisma", phase_id: null, status: "active", priority: "high", assigned_to: null, xp_value: 40, deadline: null, created_at: "", updated_at: "" },
+  { id: "t3", run_id: "p1", title: "Implement auth system", description: "OAuth + JWT authentication", phase_id: null, status: "pending", priority: "medium", assigned_to: null, xp_value: 30, deadline: null, created_at: "", updated_at: "" },
 ];
 
-const demoChatMessages: {
-  id: string;
-  user: { username: string; avatar_url: string | null };
-  content: string;
-  created_at: string;
-}[] = [
-  {
-    id: "msg1",
-    user: { username: "sarahkim", avatar_url: null },
-    content: "Hey team! I just pushed the new UI designs. Check them out!",
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "msg2",
-    user: { username: "jamesliu", avatar_url: null },
-    content: "Looks amazing! I'll start on the database schema today.",
-    created_at: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: "msg3",
-    user: { username: "sarahkim", avatar_url: null },
-    content: "Perfect. Let's aim to have the auth flow done by Friday.",
-    created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-  },
+const demoPosts: Post[] = [
+  { id: "p1", run_id: "p1", user_id: "demo-1", content: "Just finished the Figma mockups! Check them out in the design channel.", created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+  { id: "p2", run_id: "p1", user_id: "demo-2", content: "Database schema is ready. Moving on to API endpoints next.", created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
 ];
 
-const taskStatusConfig = {
-  todo: { icon: Circle, label: "To Do", color: "text-[#94A3B8]" },
-  in_progress: { icon: Clock, label: "In Progress", color: "text-amber-500" },
-  done: { icon: CheckCircle2, label: "Done", color: "text-emerald-500" },
+const demoMembers: ProjectMember[] = [
+  { id: "m1", run_id: "p1", user_id: "demo-1", squad_role: "leader", joined_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), user: { id: "demo-1", email: "sarah@example.com", username: "sarahkim", avatar_url: null, bio: null, skills: [], role: "user", reputation_score: 85, xp: 1020, level: 5, created_at: "" } },
+  { id: "m2", run_id: "p1", user_id: "demo-2", squad_role: "member", joined_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), user: { id: "demo-2", email: "james@example.com", username: "jamesliu", avatar_url: null, bio: null, skills: [], role: "user", reputation_score: 72, xp: 864, level: 4, created_at: "" } },
+  { id: "m3", run_id: "p1", user_id: "demo-3", squad_role: "member", joined_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), user: { id: "demo-3", email: "priya@example.com", username: "priyapatel", avatar_url: null, bio: null, skills: [], role: "user", reputation_score: 67, xp: 804, level: 4, created_at: "" } },
+];
+
+const demoProject: Project = {
+  id: "p1", challenge_id: "1", name: "AI Pair Programmer Run",
+  description: "Squad building an AI-powered pair programming tool.",
+  status: "active", completed_at: null, progress_pct: 42, xp_earned: 210,
+  created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  updated_at: new Date().toISOString(),
+  members: demoMembers,
 };
 
-export default function ProjectDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: "overview", label: "Overview", icon: BarChart3 },
+  { id: "missions", label: "Missions", icon: Swords },
+  { id: "phases", label: "Phases", icon: Flag },
+  { id: "chat", label: "Squad Chat", icon: MessageSquare },
+  { id: "squad", label: "Squad", icon: Users },
+  { id: "activity", label: "Activity", icon: Activity },
+];
+
+const MISSION_STATUS_STYLES: Record<string, string> = {
+  pending: "bg-[#64748B]/10 text-[#64748B] border-[#64748B]/20",
+  active: "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20",
+  completed: "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20",
+};
+
+const PHASE_STATUS_STYLES: Record<string, string> = {
+  not_started: "bg-[#64748B]/10 text-[#64748B] border-[#64748B]/20",
+  active: "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20",
+  completed: "bg-[#00FFA3]/10 text-[#00FFA3] border-[#00FFA3]/20",
+};
+
+export default function RunDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const user = useAppStore((s) => s.user);
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [milestones, setMilestones] = useState<Milestone[]>(demoMilestones);
-  const [activity, setActivity] = useState<ActivityFeedItem[]>(demoActivity);
-  const [chatMessages, setChatMessages] = useState<typeof demoChatMessages>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [showNewTask, setShowNewTask] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [newTaskPriority, setNewTaskPriority] = useState<"low"|"medium"|"high">("medium");
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [missions, setMissions] = useState<Task[]>([]);
+  const [phases, setPhases] = useState<Milestone[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [activity, setActivity] = useState<ActivityFeedItem[]>([]);
   const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const [newPost, setNewPost] = useState("");
+  const [showNewMission, setShowNewMission] = useState(false);
+  const [newMissionTitle, setNewMissionTitle] = useState("");
+  const [newMissionPriority, setNewMissionPriority] = useState<"low" | "medium" | "high">("medium");
+  const [completing, setCompleting] = useState(false);
 
   useEffect(() => {
-    const fetchProject = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
         const supabase = createClient();
-        const [projectRes, tasksRes, milestonesRes, activityRes, membersRes, postsRes] = await Promise.all([
-          supabase.from("projects").select("*").eq("id", id).single(),
-          supabase.from("tasks").select("*").eq("project_id", id).order("created_at", { ascending: true }),
-          supabase.from("milestones").select("*").eq("project_id", id).order("sort_order", { ascending: true }),
-          supabase.from("activity_feed").select("*").eq("project_id", id).order("created_at", { ascending: false }).limit(20),
-          supabase.from("project_members").select("*, user:users!project_members_user_id_fkey(*)").eq("project_id", id),
-          supabase.from("posts").select("*, user:users!posts_user_id_fkey(*)").eq("project_id", id).order("created_at", { ascending: true }).limit(100),
+        const { data } = await supabase.from("challenge_runs").select("*, members:run_members(*, user:users!run_members_user_id_fkey(*))").eq("id", id).single();
+        if (data) setProject(data);
+        const [tasksRes, milestonesRes, postsRes, activityRes] = await Promise.all([
+          supabase.from("missions").select("*").eq("run_id", id).order("created_at", { ascending: true }),
+          supabase.from("phases").select("*").eq("run_id", id).order("sort_order", { ascending: true }),
+          supabase.from("posts").select("*").eq("run_id", id).order("created_at", { ascending: false }),
+          supabase.from("activity_feed").select("*").eq("run_id", id).order("created_at", { ascending: false }).limit(20),
         ]);
-
-        if (projectRes.data) setProject(projectRes.data);
-        if (tasksRes.data) setTasks(tasksRes.data);
-        if (milestonesRes.data && milestonesRes.data.length > 0) setMilestones(milestonesRes.data);
-        if (activityRes.data && activityRes.data.length > 0) setActivity(activityRes.data);
-        if (membersRes.data) setMembers(membersRes.data);
-        if (postsRes.data && postsRes.data.length > 0) {
-          setChatMessages(postsRes.data.map((p: any) => ({
-            id: p.id,
-            user: { username: p.user?.username || "User", avatar_url: p.user?.avatar_url || null },
-            content: p.content,
-            created_at: p.created_at,
-          })));
-        }
-      } catch {
-        // Keep demo data on error
-      } finally {
-        setDataLoaded(true);
-      }
+        setMissions((tasksRes.data as Task[]) ?? []);
+        setPhases((milestonesRes.data as Milestone[]) ?? []);
+        setPosts((postsRes.data as Post[]) ?? []);
+        setActivity((activityRes.data as ActivityFeedItem[]) ?? []);
+      } catch { setProject(demoProject); setMissions(demoMissions); setPhases(demoPhases); setPosts(demoPosts); setActivity(demoActivity); setMembers(demoMembers); }
+      finally { setLoading(false); }
     };
-
-    fetchProject();
+    fetchData();
   }, [id]);
 
-  const toggleTaskStatus = async (taskId: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
-    const next =
-      task.status === "todo" ? "in_progress" :
-      task.status === "in_progress" ? "done" : "todo";
-    // Optimistic update
-    setTasks(tasks.map((t) => t.id === taskId ? { ...t, status: next } : t));
-    try {
-      const supabase = createClient();
-      await supabase.rpc("update_task_status", { p_task_id: taskId, p_status: next });
-    } catch {
-      // Revert on failure
-      setTasks(tasks.map((t) => t.id === taskId ? { ...t, status: task.status } : t));
-    }
+  const addMission = async () => {
+    if (!newMissionTitle.trim()) return;
+    const mission: Task = { id: crypto.randomUUID(), run_id: id, title: newMissionTitle, description: null, phase_id: null, status: "pending", priority: newMissionPriority, assigned_to: null, xp_value: 20, deadline: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+    setMissions([...missions, mission]);
+    setNewMissionTitle(""); setNewMissionPriority("medium"); setShowNewMission(false);
+    try { const supabase = createClient(); await supabase.from("tasks").insert({ run_id: id, title: newMissionTitle, priority: newMissionPriority }); }
+    catch {}
   };
 
-  const addTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    const tempId = crypto.randomUUID();
-    const task: Task = {
-      id: tempId,
-      project_id: id,
-      title: newTaskTitle,
-      milestone_id: null,
-      description: null,
-      completed: false,
-      status: "todo",
-      assigned_to: user?.id || null,
-      priority: newTaskPriority,
-      deadline: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    setTasks([...tasks, task]);
-    setNewTaskTitle("");
-    setShowNewTask(false);
-    try {
-      const supabase = createClient();
-      const { data } = await supabase
-        .from("tasks")
-        .insert({
-          project_id: id,
-          title: task.title,
-          priority: task.priority,
-          assigned_to: task.assigned_to,
-          status: "todo",
-          completed: false,
-        })
-        .select()
-        .single();
-      // Replace temp id with real DB id
-      if (data) {
-        setTasks((prev) => prev.map((t) => t.id === tempId ? { ...t, id: data.id } : t));
-      }
-    } catch {
-      // Task remains locally; will sync on next reload
-    }
+  const addPost = async () => {
+    if (!newPost.trim() || !user) return;
+    const post: Post = { id: crypto.randomUUID(), run_id: id, user_id: user.id, content: newPost, created_at: new Date().toISOString(), user };
+    setPosts([post, ...posts]); setNewPost("");
+    try { const supabase = createClient(); await supabase.from("posts").insert({ run_id: id, content: newPost }); }
+    catch {}
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
-    const tempMsg = {
-      id: crypto.randomUUID(),
-      user: { username: user.username, avatar_url: user.avatar_url || null },
-      content: newMessage,
-      created_at: new Date().toISOString(),
-    };
-    setChatMessages([...chatMessages, tempMsg]);
-    const text = newMessage;
-    setNewMessage("");
-    try {
-      const supabase = createClient();
-      const { data } = await supabase
-        .from("posts")
-        .insert({ project_id: id, user_id: user.id, content: text })
-        .select()
-        .single();
-      if (data) {
-        setChatMessages((prev) => prev.map((m) => m.id === tempMsg.id ? { ...m, id: data.id } : m));
-      }
-    } catch { /* message stays locally */ }
+  const completeProject = async () => {
+    if (!project) return;
+    setCompleting(true);
+    try { const supabase = createClient(); await supabase.rpc("complete_run", { p_run_id: id }); router.push(`/projects/${id}`); }
+    catch (err: any) { alert(err?.message || "Failed to complete run"); }
+    finally { setCompleting(false); }
   };
 
-  const doneCount = tasks.filter((t) => t.status === "done").length;
-  const progress = tasks.length > 0 ? (doneCount / tasks.length) * 100 : 0;
+  const claimMission = async (missionId: string) => {
+    if (!user) return;
+    setMissions(missions.map((m) => m.id === missionId ? { ...m, assigned_to: user.id, status: "active" } : m));
+    try { const supabase = createClient(); await supabase.rpc("claim_mission", { p_mission_id: missionId }); }
+    catch {}
+  };
 
-  const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: "Overview", icon: Target },
-    { id: "tasks", label: "Tasks", icon: ListTodo },
-    { id: "milestones", label: "Milestones", icon: Flag },
-    { id: "chat", label: "Chat", icon: MessageSquare },
-    { id: "members", label: "Members", icon: Users },
-    { id: "activity", label: "Activity", icon: Activity },
-  ];
+  const currentMembers = members.length > 0 ? members : (project?.members ?? []);
+  const isOwner = user && currentMembers.some((m) => m.user_id === user.id && m.squad_role === "leader");
+
+  if (loading) return (
+    <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+      <div className="w-10 h-10 border-2 border-[#FF3366]/30 border-t-[#FF3366] rounded-full animate-spin mx-auto mb-4" />
+      <p className="text-[#94A3B8] text-sm">Loading run…</p>
+    </div>
+  );
+
+  if (!project) return (
+    <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+      <p className="text-2xl mb-2">🔍</p>
+      <h2 className="text-lg font-bold text-white mb-2">Run not found</h2>
+      <Link href="/projects" className="text-sm font-bold text-[#FF3366] hover:underline">← Back to Runs</Link>
+    </div>
+  );
+
+  const doneMissions = missions.filter((m) => m.status === "completed").length;
+  const totalMissions = missions.length || 1;
+  const progress = Math.round((doneMissions / totalMissions) * 100);
+  const completedPhases = phases.filter((p) => p.status === "completed").length;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-[#9CA3AF] hover:text-[#0A0A0F] transition-colors mb-6 font-medium">
-          <ArrowLeft className="w-4 h-4" />Back to Projects
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-white transition-colors mb-5 sm:mb-6 font-medium">
+          <ArrowLeft className="w-4 h-4" />Back to Runs
         </Link>
 
-        {!dataLoaded && !project && (
-          <div className="text-center py-16">
-            <div className="w-10 h-10 border-2 border-[#FF2D2D]/30 border-t-[#FF2D2D] rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-[#9CA3AF] text-sm">Loading project…</p>
-          </div>
-        )}
-
-        {/* Project Header */}
-        {project && (
-        <div className="glass-strong rounded-3xl border border-white/80 overflow-hidden mb-6" style={{boxShadow:"0 8px 40px rgba(0,0,0,0.08)"}}>
-          <div className="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-teal-500 to-blue-500" />
+        {/* Header */}
+        <div className="glass-dark rounded-2xl border border-white/[0.06] overflow-hidden mb-6">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[#FF3366] via-[#FF6B9D] to-[#A855F7]" />
           <div className="p-6 sm:p-8">
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-md">
-                  {project.name.charAt(0)}
-                </div>
-                <div>
-                  <h1 className="text-2xl font-black text-[#0A0A0F] tracking-tight">{project.name}</h1>
-                  <p className="text-[#9CA3AF] text-sm">{project.description}</p>
-                </div>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">{project.name}</h1>
+                <p className="text-[#94A3B8] text-sm">{project.description}</p>
               </div>
-              <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{project.status}
-              </span>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                <span className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full border bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20">
+                  <Flame className="w-3 h-3" />{project.status}
+                </span>
+                {isOwner && project.status === "active" && (
+                  <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}} onClick={completeProject} disabled={completing}
+                    className="flex items-center gap-1.5 bg-gradient-hero text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer disabled:opacity-50"
+                  ><Trophy className="w-4 h-4" />{completing ? "Completing…" : "Complete Run"}</motion.button>
+                )}
+              </div>
             </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-[#374151]">Progress</span>
-                <span className="text-sm font-black text-[#FF2D2D]">{Math.round(progress)}%</span>
+
+            {/* Progress */}
+            <div className="mb-4">
+              <div className="flex justify-between text-xs mb-2">
+                <span className="text-[#94A3B8] font-medium">Run Progress</span>
+                <span className="font-bold text-[#00E5FF]">{progress}%</span>
               </div>
-              <div className="w-full h-2 bg-black/[0.06] rounded-full overflow-hidden">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full"
-                />
+              <div className="w-full h-2.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1 }}
+                  className="h-full bg-gradient-to-r from-[#FF3366] to-[#A855F7] rounded-full" />
               </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { icon: Swords, label: "Missions", value: `${doneMissions}/${totalMissions}` },
+                { icon: Flag, label: "Phases", value: `${completedPhases}/${phases.length || 1}` },
+                { icon: Users, label: "Squad", value: `${currentMembers.length}` },
+                { icon: Zap, label: "XP Earned", value: `${project.xp_earned ?? 0}` },
+              ].map((stat) => (
+                <div key={stat.label} className="glass-dark rounded-xl p-3 border border-white/[0.04] text-center">
+                  <stat.icon className="w-4 h-4 text-[#FF3366] mx-auto mb-1.5" />
+                  <p className="text-lg font-black text-white">{stat.value}</p>
+                  <p className="text-[10px] text-[#64748B] uppercase tracking-wider font-bold">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        )}
 
         {/* Tabs */}
-        <div className="flex items-center gap-1 glass-strong rounded-2xl border border-white/80 p-1 sm:p-1.5 mb-5 sm:mb-6 overflow-x-auto scrollbar-hide" style={{boxShadow:"0 2px 8px rgba(0,0,0,0.05)"}}>
-          {tabs.map((tab) => (
-            <motion.button key={tab.id} whileTap={{ scale: 0.96 }}
-              onClick={() => setActiveTab(tab.id)}
+        <div className="flex items-center gap-1 glass-dark rounded-2xl border border-white/[0.06] p-1 mb-6 overflow-x-auto scrollbar-hide">
+          {TABS.map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap",
-                activeTab === tab.id
-                  ? "gradient-bg text-white shadow-md shadow-red-200/60"
-                  : "text-[#9CA3AF] hover:text-[#0A0A0F] hover:bg-black/[0.04]"
+                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer",
+                activeTab === tab.id ? "bg-gradient-hero text-white shadow-lg shadow-[#FF3366]/20" : "text-[#64748B] hover:text-white hover:bg-white/[0.04]"
               )}
             >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </motion.button>
+              <tab.icon className="w-4 h-4" />{tab.label}
+            </button>
           ))}
         </div>
 
-        {/* Tab Content */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {/* Overview Tab */}
+          <motion.div key={activeTab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+
+            {/* Overview */}
             {activeTab === "overview" && (
               <div className="space-y-5">
-                {/* Stats row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[
-                    { label: "To Do", count: tasks.filter((t) => t.status === "todo").length, accent: "from-gray-100 to-slate-100", num: "text-[#374151]" },
-                    { label: "In Progress", count: tasks.filter((t) => t.status === "in_progress").length, accent: "from-amber-50 to-orange-50", num: "text-amber-600" },
-                    { label: "Done", count: doneCount, accent: "from-emerald-50 to-teal-50", num: "text-emerald-600" },
-                    { label: "Members", count: members.length, accent: "from-blue-50 to-indigo-50", num: "text-blue-600" },
-                  ].map((stat) => (
-                    <div key={stat.label} className={cn("rounded-3xl p-5 bg-gradient-to-br border border-white/80", stat.accent)} style={{boxShadow:"0 2px 8px rgba(0,0,0,0.04)"}}>
-                      <p className={cn("text-3xl font-black", stat.num)}>{stat.count}</p>
-                      <p className="text-xs font-semibold text-[#9CA3AF] mt-1">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Milestone roadmap */}
-                <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                  <h3 className="text-sm font-bold text-[#0A0A0F] mb-4 flex items-center gap-2">
-                    <Flag className="w-4 h-4 text-[#FF2D2D]" />Milestone Roadmap
-                  </h3>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                    {milestones.map((m, i) => (
-                      <div key={m.id} className="flex items-center gap-2 flex-shrink-0">
-                        <div className={cn(
-                          "flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl min-w-[96px] text-center border",
-                          m.status === "completed" ? "bg-emerald-50 border-emerald-100" :
-                          m.status === "active" ? "bg-[#FFF0F0] border-red-200" :
-                          "bg-black/[0.02] border-black/[0.05]"
-                        )}>
-                          {m.status === "completed" ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            : m.status === "active" ? <Zap className="w-4 h-4 text-[#FF2D2D]" />
-                            : <Circle className="w-4 h-4 text-[#D1D5DB]" />}
-                          <span className={cn("text-xs font-semibold",
-                            m.status === "completed" ? "text-emerald-700" :
-                            m.status === "active" ? "text-[#FF2D2D]" : "text-[#9CA3AF]"
-                          )}>{m.title}</span>
-                        </div>
-                        {i < milestones.length - 1 && <ChevronRight className="w-4 h-4 text-[#D1D5DB] flex-shrink-0" />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recent activity */}
-                <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                  <h3 className="text-sm font-bold text-[#0A0A0F] mb-4 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-[#FF2D2D]" />Recent Activity
-                  </h3>
-                  <div className="space-y-3">
-                    {activity.slice(0, 4).map((item) => (
-                      <div key={item.id} className="flex items-start gap-3">
-                        <div className={cn("w-2 h-2 mt-1.5 rounded-full flex-shrink-0",
-                          item.type === "task_completed" ? "bg-emerald-500" :
-                          item.type === "milestone_completed" ? "bg-[#FF2D2D]" :
-                          item.type === "member_joined" ? "bg-blue-500" : "bg-amber-400"
-                        )} />
-                        <div className="flex-1">
-                          <p className="text-sm text-[#374151]">{item.message}</p>
-                          <p className="text-xs text-[#9CA3AF]" suppressHydrationWarning>{timeAgo(item.created_at)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Onboarding checklist */}
-                <div className="bg-gradient-to-br from-[#FFF0F0] to-white rounded-3xl border border-red-100 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-[#0A0A0F] flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-[#FF2D2D]" />Getting Started
-                    </h3>
-                    <button onClick={() => setShowOnboarding(!showOnboarding)} className="text-xs text-[#FF2D2D] font-bold cursor-pointer">
-                      {showOnboarding ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  {showOnboarding && (
-                    <div className="space-y-1.5">
-                      {[
-                        { done: true, text: "Project created" },
-                        { done: true, text: "Team assembled" },
-                        { done: false, text: "Set your first milestone" },
-                        { done: false, text: "Create and assign tasks" },
-                        { done: false, text: "Complete your first milestone" },
-                      ].map((step, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2">
-                          {step.done
-                            ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                            : <Circle className="w-4 h-4 text-[#D1D5DB] flex-shrink-0" />}
-                          <span className={cn("text-sm", step.done ? "line-through text-[#9CA3AF]" : "text-[#0A0A0F] font-medium")}>{step.text}</span>
+                <div className="glass-dark rounded-2xl border border-white/[0.06] p-6">
+                  <h3 className="font-bold text-white mb-4 flex items-center gap-2"><Swords className="w-4 h-4 text-[#FF3366]" />Active Missions</h3>
+                  {missions.filter((m) => m.status !== "completed").length === 0 ? (
+                    <p className="text-sm text-[#64748B]">All missions completed! 🎉</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {missions.filter((m) => m.status !== "completed").slice(0, 5).map((mission) => (
+                        <div key={mission.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                          <div className="flex items-center gap-3">
+                            <div className={cn("w-2 h-2 rounded-full", mission.priority === "high" ? "bg-[#FF3366]" : mission.priority === "medium" ? "bg-[#FFD700]" : "bg-[#00E5FF]")} />
+                            <div>
+                              <p className="text-sm font-semibold text-white">{mission.title}</p>
+                              <p className="text-xs text-[#64748B]">{mission.assigned_to ? "In progress" : "Unassigned"} · {mission.xp_value ?? 0} XP</p>
+                            </div>
+                          </div>
+                          {!mission.assigned_to && (
+                            <motion.button whileHover={{scale:1.05}} whileTap={{scale:0.95}} onClick={() => claimMission(mission.id)}
+                              className="px-3 py-1.5 bg-[#00E5FF]/10 text-[#00E5FF] text-xs font-bold rounded-lg border border-[#00E5FF]/20 hover:bg-[#00E5FF]/20 transition-colors cursor-pointer"
+                            >Claim</motion.button>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
-              </div>
-            )}
 
-            {/* Tasks (Kanban) Tab */}
-            {activeTab === "tasks" && (
-              <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-bold text-[#0A0A0F]">Tasks ({tasks.length})</h2>
-                  <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}}
-                    onClick={() => setShowNewTask(true)}
-                    className="flex items-center gap-1.5 gradient-bg text-white px-4 py-2 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer"
-                  ><Plus className="w-4 h-4" />Add Task</motion.button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {(["todo", "in_progress", "done"] as const).map((status) => {
-                    const config = taskStatusConfig[status];
-                    const statusTasks = tasks.filter((t) => t.status === status);
-                    return (
-                      <div key={status} className="bg-black/[0.02] rounded-2xl p-3 border border-black/[0.05]">
-                        <div className="flex items-center gap-2 mb-3">
-                          <config.icon className={cn("w-4 h-4", config.color)} />
-                          <span className="text-xs font-bold text-[#374151]">{config.label}</span>
-                          <span className="ml-auto text-[10px] font-bold text-[#9CA3AF] bg-white px-1.5 py-0.5 rounded-full border border-black/[0.06]">{statusTasks.length}</span>
+                <div className="glass-dark rounded-2xl border border-white/[0.06] p-6">
+                  <h3 className="font-bold text-white mb-4 flex items-center gap-2"><Flag className="w-4 h-4 text-[#FF3366]" />Phase Progress</h3>
+                  <div className="space-y-4">
+                    {phases.map((phase, i) => (
+                      <div key={phase.id} className="flex items-center gap-4">
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                          phase.status === "completed" ? "bg-[#00FFA3]/10 text-[#00FFA3]" : phase.status === "active" ? "bg-[#00E5FF]/10 text-[#00E5FF]" : "bg-white/[0.03] text-[#64748B]"
+                        )}>{phase.status === "completed" ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-xs font-bold">{i + 1}</span>}</div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-white">{phase.title}</p>
+                          <p className="text-xs text-[#64748B]">{phase.description}</p>
                         </div>
-                        <div className="space-y-2">
-                          {statusTasks.map((task) => (
-                            <motion.div key={task.id} layout whileHover={{y:-2}}
-                              className="bg-white rounded-2xl p-3 border border-black/[0.06] cursor-pointer hover:border-[#FF2D2D]/20 transition-colors"
-                              style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
-                              onClick={() => toggleTaskStatus(task.id)}
-                            >
-                              <p className={cn("text-xs font-semibold mb-2",
-                                status === "done" ? "line-through text-[#9CA3AF]" : "text-[#0A0A0F]"
-                              )}>{task.title}</p>
-                              <div className="flex items-center justify-between">
-                                <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full border",
-                                  task.priority === "high" ? "bg-red-50 text-red-500 border-red-100" :
-                                  task.priority === "medium" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                  "bg-gray-100 text-gray-500 border-gray-200"
-                                )}>{task.priority}</span>
-                                {task.assigned_to && (() => {
-                                  const assignee = members.find((m) => m.user_id === task.assigned_to);
-                                  const label = assignee?.user?.username?.charAt(0).toUpperCase() ?? "?";
-                                  return (
-                                    <div className="w-5 h-5 rounded-full gradient-bg flex items-center justify-center text-white text-[9px] font-black" title={assignee?.user?.username ?? task.assigned_to}>
-                                      {label}
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            </motion.div>
-                          ))}
-                          {statusTasks.length === 0 && (
-                            <p className="text-xs text-[#D1D5DB] text-center py-4">No tasks</p>
-                          )}
-                        </div>
+                        <span className={cn("text-[10px] font-bold px-2 py-1 rounded-full border", PHASE_STATUS_STYLES[phase.status])}>{phase.status === "not_started" ? "Pending" : phase.status}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Milestones Tab */}
-            {activeTab === "milestones" && (
-              <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                <h2 className="font-bold text-[#0A0A0F] mb-5 flex items-center gap-2">
-                  <Flag className="w-4 h-4 text-[#FF2D2D]" />Milestones
-                </h2>
-                <div className="space-y-3">
-                  {milestones.map((m, i) => {
-                    const milestoneTasks = tasks.filter((t) => t.milestone_id === m.id);
-                    const doneTasks = milestoneTasks.filter((t) => t.status === "done").length;
-                    const pct = milestoneTasks.length > 0 ? Math.round((doneTasks / milestoneTasks.length) * 100) : 0;
-                    return (
-                      <motion.div key={m.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className={cn("p-4 rounded-2xl border transition-all",
-                          m.status === "completed" ? "border-emerald-100 bg-emerald-50" :
-                          m.status === "active" ? "border-red-100 bg-[#FFF8F8]" :
-                          "border-black/[0.05] bg-black/[0.02]"
-                        )}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <span className={cn("w-7 h-7 rounded-full flex items-center justify-center text-xs font-black",
-                              m.status === "completed" ? "bg-emerald-500 text-white" :
-                              m.status === "active" ? "bg-[#FF2D2D] text-white" :
-                              "bg-black/[0.08] text-[#9CA3AF]"
-                            )}>{i + 1}</span>
-                            <div>
-                              <p className="font-bold text-[#0A0A0F] text-sm">{m.title}</p>
-                              {m.description && <p className="text-xs text-[#9CA3AF]">{m.description}</p>}
-                            </div>
-                          </div>
-                          <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border",
-                            m.status === "completed" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                            m.status === "active" ? "bg-amber-50 text-amber-600 border-amber-100" :
-                            "bg-gray-100 text-gray-500 border-gray-200"
-                          )}>{m.status === "not_started" ? "Not started" : m.status === "active" ? "Active" : "Done"}</span>
-                        </div>
-                        {milestoneTasks.length > 0 && (
-                          <div className="mt-2">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-[#9CA3AF]">{doneTasks}/{milestoneTasks.length} tasks</span>
-                              <span className="font-bold text-[#FF2D2D]">{pct}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-black/[0.06] rounded-full overflow-hidden">
-                              <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                                className="h-full rounded-full gradient-bg"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Chat Tab */}
-            {activeTab === "chat" && (
-              <div className="glass-strong rounded-3xl border border-white/80 overflow-hidden" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                <div className="p-5 h-96 overflow-y-auto space-y-4">
-                  {chatMessages.map((msg) => (
-                    <div key={msg.id} className="flex gap-3">
-                      <Avatar src={msg.user.avatar_url} name={msg.user.username} size="sm" />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-bold text-[#0A0A0F]">{msg.user.username}</span>
-                          <span className="text-xs text-[#9CA3AF]">
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-[#374151] bg-black/[0.03] rounded-2xl rounded-tl-sm px-4 py-2.5 inline-block border border-black/[0.05]">
-                          {msg.content}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-black/[0.06] p-4">
-                  <div className="relative">
-                    <input type="text" placeholder="Type a message…"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
-                      className="w-full h-12 pl-4 pr-14 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm"
-                      style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
-                    />
-                    <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}}
-                      onClick={sendMessage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 gradient-bg text-white rounded-xl cursor-pointer"
-                    ><Send className="w-4 h-4" /></motion.button>
+                    ))}
+                    {phases.length === 0 && <p className="text-sm text-[#64748B]">No phases defined yet.</p>}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Members Tab */}
-            {activeTab === "members" && (
-              <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                <h2 className="font-bold text-[#0A0A0F] mb-5">Team Members ({members.length})</h2>
-                <div className="space-y-2.5">
-                  {members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 rounded-2xl bg-black/[0.02] border border-black/[0.05]">
-                      <div className="flex items-center gap-3">
-                        <Avatar src={member.user?.avatar_url || null} name={member.user?.username || "User"} />
-                        <div>
-                          <p className="font-bold text-[#0A0A0F] text-sm">{member.user?.username}</p>
-                          <p className="text-xs text-[#9CA3AF]">{member.user?.email}</p>
-                          <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                            {(member.user?.skills ?? []).slice(0, 4).map((s: string) => (
-                              <span key={s} className="text-[10px] font-semibold px-2 py-0.5 bg-black/[0.04] text-[#6B7280] rounded-full border border-black/[0.06]">{s}</span>
-                            ))}
+            {/* Missions */}
+            {activeTab === "missions" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white flex items-center gap-2"><Swords className="w-4 h-4 text-[#FF3366]" />Squad Missions</h3>
+                  {isOwner && (
+                    <motion.button whileHover={{scale:1.04}} whileTap={{scale:0.97}} onClick={() => setShowNewMission(true)}
+                      className="flex items-center gap-1.5 bg-gradient-hero text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer"
+                    ><Plus className="w-4 h-4" />New Mission</motion.button>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {missions.map((mission) => (
+                    <motion.div key={mission.id} whileHover={{ y: -2 }} className="glass-dark rounded-xl border border-white/[0.06] p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <div className={cn("w-2 h-2 rounded-full mt-2 flex-shrink-0", mission.priority === "high" ? "bg-[#FF3366]" : mission.priority === "medium" ? "bg-[#FFD700]" : "bg-[#00E5FF]")} />
+                          <div>
+                            <p className="text-sm font-semibold text-white">{mission.title}</p>
+                            {mission.description && <p className="text-xs text-[#64748B] mt-0.5">{mission.description}</p>}
+                            <div className="flex items-center gap-3 mt-2">
+                              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", MISSION_STATUS_STYLES[mission.status])}>{mission.status}</span>
+                              <span className="text-[10px] text-[#64748B] font-medium flex items-center gap-1"><Zap className="w-3 h-3 text-[#FFD700]" />{mission.xp_value ?? 0} XP</span>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                          {mission.assigned_to ? (
+                            <div className="flex items-center gap-1.5">
+                              <Avatar src={currentMembers.find((m) => m.user_id === mission.assigned_to)?.user?.avatar_url} name={currentMembers.find((m) => m.user_id === mission.assigned_to)?.user?.username || "User"} size="sm" />
+                              <span className="text-xs text-[#94A3B8]">{currentMembers.find((m) => m.user_id === mission.assigned_to)?.user?.username}</span>
+                            </div>
+                          ) : (
+                            <motion.button whileHover={{scale:1.05}} whileTap={{scale:0.95}} onClick={() => claimMission(mission.id)}
+                              className="px-3 py-1.5 bg-[#00E5FF]/10 text-[#00E5FF] text-xs font-bold rounded-lg border border-[#00E5FF]/20 hover:bg-[#00E5FF]/20 transition-colors cursor-pointer"
+                            >Claim</motion.button>
+                          )}
+                        </div>
                       </div>
-                      <span className={cn("text-xs font-bold px-2.5 py-1 rounded-full border",
-                        member.role === "owner" ? "bg-[#FFF0F0] text-[#FF2D2D] border-red-100" : "bg-gray-100 text-gray-500 border-gray-200"
-                      )}>{member.role}</span>
-                    </div>
+                    </motion.div>
                   ))}
-                  {members.length === 0 && !dataLoaded && (
-                    <p className="text-sm text-[#9CA3AF] text-center py-6">Loading members…</p>
-                  )}
+                  {missions.length === 0 && <p className="text-sm text-[#64748B] text-center py-12">No missions yet. Add one to get started!</p>}
                 </div>
               </div>
             )}
 
-            {/* Activity Tab */}
-            {activeTab === "activity" && (
-              <div className="glass-strong rounded-3xl border border-white/80 p-5" style={{boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
-                <h2 className="font-bold text-[#0A0A0F] mb-5 flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-[#FF2D2D]" />Activity Feed
-                </h2>
-                <div className="space-y-1">
-                  {activity.map((item, i) => (
-                    <motion.div key={item.id}
-                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-black/[0.02] transition-colors"
-                    >
-                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0",
-                        item.type === "task_completed" ? "bg-emerald-50" :
-                        item.type === "milestone_completed" ? "bg-[#FFF0F0]" :
-                        item.type === "member_joined" ? "bg-blue-50" : "bg-amber-50"
-                      )}>
-                        {item.type === "task_completed" || item.type === "task_started" || item.type === "task_claimed"
-                          ? <ListTodo className={cn("w-4 h-4", item.type === "task_completed" ? "text-emerald-500" : "text-amber-500")} />
-                          : item.type === "milestone_completed" ? <Flag className="w-4 h-4 text-[#FF2D2D]" />
-                          : <Users className="w-4 h-4 text-blue-500" />
-                        }
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-[#374151] font-medium">{item.message}</p>
-                        <p className="text-xs text-[#9CA3AF] mt-0.5" suppressHydrationWarning>{timeAgo(item.created_at)}</p>
+            {/* Phases */}
+            {activeTab === "phases" && (
+              <div className="space-y-4">
+                <h3 className="font-bold text-white flex items-center gap-2"><Flag className="w-4 h-4 text-[#FF3366]" />Run Phases</h3>
+                <div className="space-y-3">
+                  {phases.map((phase, i) => (
+                    <motion.div key={phase.id} whileHover={{ y: -2 }} className="glass-dark rounded-xl border border-white/[0.06] p-5">
+                      <div className="flex items-center gap-4">
+                        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                          phase.status === "completed" ? "bg-[#00FFA3]/10 text-[#00FFA3]" : phase.status === "active" ? "bg-[#00E5FF]/10 text-[#00E5FF]" : "bg-white/[0.03] text-[#64748B]"
+                        )}>{phase.status === "completed" ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-sm font-black">{i + 1}</span>}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <p className="font-bold text-white">{phase.title}</p>
+                            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", PHASE_STATUS_STYLES[phase.status])}>{phase.status === "not_started" ? "Pending" : phase.status}</span>
+                          </div>
+                          <p className="text-xs text-[#94A3B8]">{phase.description}</p>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
+                  {phases.length === 0 && <p className="text-sm text-[#64748B] text-center py-12">No phases defined yet.</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Chat */}
+            {activeTab === "chat" && (
+              <div className="glass-dark rounded-2xl border border-white/[0.06] p-6">
+                <h3 className="font-bold text-white mb-5 flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#FF3366]" />Squad Chat</h3>
+                <div className="space-y-4 mb-5 max-h-[500px] overflow-y-auto">
+                  {posts.map((post) => (
+                    <div key={post.id} className="flex gap-3">
+                      <Avatar src={post.user?.avatar_url} name={post.user?.username || "User"} size="sm" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-bold text-white">{post.user?.username || "User"}</span>
+                          <span className="text-xs text-[#64748B]" suppressHydrationWarning>{timeAgo(post.created_at)}</span>
+                        </div>
+                        <p className="text-sm text-[#94A3B8] bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">{post.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {posts.length === 0 && <p className="text-sm text-[#64748B] text-center py-8">No messages yet. Start the conversation!</p>}
+                </div>
+                {user ? (
+                  <div className="relative">
+                    <input type="text" placeholder="Message your squad…" value={newPost} onChange={(e) => setNewPost(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") addPost(); }}
+                      className="w-full h-12 pl-4 pr-14 rounded-xl border border-white/[0.06] bg-white/[0.02] text-white placeholder-[#64748B] focus:outline-none focus:border-[#FF3366]/30 transition-all text-sm"
+                    />
+                    <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={addPost}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-gradient-hero text-white rounded-lg cursor-pointer"
+                    ><Send className="w-4 h-4" /></motion.button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#64748B] text-center">Sign in to join the conversation</p>
+                )}
+              </div>
+            )}
+
+            {/* Squad */}
+            {activeTab === "squad" && (
+              <div className="glass-dark rounded-2xl border border-white/[0.06] p-6">
+                <h3 className="font-bold text-white mb-5 flex items-center gap-2"><Users className="w-4 h-4 text-[#FF3366]" />Squad Members</h3>
+                <div className="space-y-3">
+                  {currentMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                      <div className="flex items-center gap-3">
+                        <Avatar src={member.user?.avatar_url} name={member.user?.username || "User"} size="md" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-white">{member.user?.username}</p>
+                            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                              member.squad_role === "leader" ? "bg-[#FF3366]/10 text-[#FF3366] border-[#FF3366]/20" : "bg-[#00E5FF]/10 text-[#00E5FF] border-[#00E5FF]/20"
+                            )}>{member.squad_role}</span>
+                          </div>
+                          <p className="text-xs text-[#64748B]">Level {member.user?.level ?? 1} · {member.user?.xp ?? 0} XP</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-[#64748B]">Joined {timeAgo(member.joined_at)}</span>
+                    </div>
+                  ))}
+                  {currentMembers.length === 0 && <p className="text-sm text-[#64748B] text-center py-8">No squad members yet.</p>}
+                </div>
+              </div>
+            )}
+
+            {/* Activity */}
+            {activeTab === "activity" && (
+              <div className="glass-dark rounded-2xl border border-white/[0.06] p-6">
+                <h3 className="font-bold text-white mb-5 flex items-center gap-2"><Activity className="w-4 h-4 text-[#FF3366]" />Activity Feed</h3>
+                <div className="space-y-1">
+                  {activity.map((item, i) => (
+                    <motion.div key={item.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.02] transition-colors"
+                    >
+                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0",
+                        item.type === "mission_completed" ? "bg-[#00FFA3]/10" : item.type === "phase_completed" ? "bg-[#FF3366]/10" : item.type === "squad_joined" ? "bg-[#00E5FF]/10" : "bg-white/[0.03]"
+                      )}>
+                        {item.type === "mission_completed" || item.type === "mission_started" || item.type === "mission_claimed"
+                          ? <Swords className={cn("w-4 h-4", item.type === "mission_completed" ? "text-[#00FFA3]" : "text-[#FFD700]")} />
+                          : item.type === "phase_completed" ? <Flag className="w-4 h-4 text-[#FF3366]" />
+                          : item.type === "squad_joined" ? <Users className="w-4 h-4 text-[#00E5FF]" />
+                          : <Rocket className="w-4 h-4 text-[#FF3366]" />
+                        }
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-[#94A3B8] font-medium">{item.message}</p>
+                        <p className="text-xs text-[#64748B] mt-0.5" suppressHydrationWarning>{timeAgo(item.created_at)}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {activity.length === 0 && <p className="text-sm text-[#64748B] text-center py-8">No activity yet.</p>}
                 </div>
               </div>
             )}
@@ -697,37 +471,29 @@ export default function ProjectDetailPage({
         </AnimatePresence>
       </motion.div>
 
-      {/* New Task Modal */}
-      <Modal isOpen={showNewTask} onClose={() => setShowNewTask(false)} title="Add New Task">
+      {/* New Mission Modal */}
+      <Modal isOpen={showNewMission} onClose={() => setShowNewMission(false)} title="New Mission">
         <div className="space-y-4">
-          <Input
-            label="Task Title"
-            placeholder="What needs to be done?"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") addTask(); }}
-          />
+          <Input label="Mission Title" placeholder="What needs to be done?" value={newMissionTitle} onChange={(e) => setNewMissionTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addMission(); }} />
           <div>
-            <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Priority</label>
+            <label className="block text-sm font-bold text-white mb-1.5">Priority</label>
             <div className="flex gap-2">
               {(["low", "medium", "high"] as const).map((p) => (
-                <button key={p} type="button" onClick={() => setNewTaskPriority(p)}
-                  className={cn(
-                    "flex-1 py-2 rounded-2xl text-sm font-semibold border transition-all cursor-pointer capitalize",
-                    newTaskPriority === p
-                      ? p === "high" ? "border-red-300 bg-red-50 text-red-600"
-                        : p === "medium" ? "border-amber-300 bg-amber-50 text-amber-600"
-                        : "border-emerald-300 bg-emerald-50 text-emerald-600"
-                      : "border-black/[0.08] text-[#9CA3AF] hover:border-black/20"
+                <button key={p} type="button" onClick={() => setNewMissionPriority(p)}
+                  className={cn("flex-1 py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer capitalize",
+                    newMissionPriority === p
+                      ? p === "high" ? "border-[#FF3366]/30 bg-[#FF3366]/10 text-[#FF3366]"
+                        : p === "medium" ? "border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]"
+                        : "border-[#00E5FF]/30 bg-[#00E5FF]/10 text-[#00E5FF]"
+                      : "border-white/[0.06] text-[#64748B] hover:border-white/[0.12]"
                   )}
                 >{p}</button>
               ))}
             </div>
           </div>
-          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.97}}
-            onClick={addTask}
-            className="w-full gradient-bg text-white py-3 rounded-2xl font-bold text-sm shadow-md shadow-red-200/40 cursor-pointer"
-          >Add Task</motion.button>
+          <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.97}} onClick={addMission}
+            className="w-full bg-gradient-hero text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-[#FF3366]/20 cursor-pointer"
+          >Add Mission</motion.button>
         </div>
       </Modal>
     </div>

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description, category, required_skills, max_members } = body;
+    const { title, description, category, difficulty, tags, required_skills, max_squad_size } = body;
 
     if (!title || title.length < 3) {
       return NextResponse.json({ error: "Title must be at least 3 characters" }, { status: 400 });
@@ -22,19 +22,21 @@ export async function POST(request: Request) {
     if (!description || description.length < 10) {
       return NextResponse.json({ error: "Description must be at least 10 characters" }, { status: 400 });
     }
-    if (!max_members || max_members < 2 || max_members > 10) {
-      return NextResponse.json({ error: "max_members must be between 2 and 10" }, { status: 400 });
+    if (!max_squad_size || max_squad_size < 2 || max_squad_size > 10) {
+      return NextResponse.json({ error: "max_squad_size must be between 2 and 10" }, { status: 400 });
     }
 
     const { data, error } = await supabase
-      .from("ideas")
+      .from("challenges")
       .insert({
         title,
         description,
         creator_id: user.id,
         category: category || "Other",
+        difficulty: difficulty || "intermediate",
+        tags: tags || [],
         required_skills: required_skills || [],
-        max_members,
+        max_squad_size,
         current_members: 1,
         status: "open",
       })
@@ -65,8 +67,8 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     let query = supabase
-      .from("ideas")
-      .select("*, creator:users!ideas_creator_id_fkey(*)", { count: "exact" });
+      .from("challenges")
+      .select("*, creator:users!challenges_creator_id_fkey(*)", { count: "exact" });
 
     if (status !== "all") {
       query = query.eq("status", status);

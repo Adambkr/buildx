@@ -35,6 +35,9 @@ export default function NewIdeaPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  const [difficulty, setDifficulty] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [roleSlots, setRoleSlots] = useState<RoleSlot[]>([]);
   const [roleInput, setRoleInput] = useState("");
   const [roleCount, setRoleCount] = useState(1);
@@ -80,12 +83,14 @@ export default function NewIdeaPage() {
     try {
       const supabase = createClient();
       const { data, error: insertError } = await supabase
-        .from("ideas")
+        .from("challenges")
         .insert({
           creator_id: user.id,
           title,
           description,
           category,
+          difficulty,
+          tags,
           required_skills: roleSlots.map((r) => r.role_name),
           max_members: maxMembers,
           current_members: 1,
@@ -99,8 +104,8 @@ export default function NewIdeaPage() {
       // Insert role slots — the DB trigger on idea_roles automatically
       // calls notify_skill_matches() for each insert, notifying matched users.
       if (roleSlots.length > 0) {
-        await supabase.from("idea_roles").insert(
-          roleSlots.map((r) => ({ idea_id: data.id, ...r }))
+        await supabase.from("challenge_roles").insert(
+          roleSlots.map((r) => ({ challenge_id: data.id, ...r }))
         );
       }
 
@@ -178,6 +183,60 @@ export default function NewIdeaPage() {
                 <option value="">Select a category</option>
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Difficulty Level</label>
+              <div className="flex gap-2">
+                {(["beginner", "intermediate", "advanced"] as const).map((level) => (
+                  <button key={level} type="button" onClick={() => setDifficulty(level)}
+                    className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold border transition-all cursor-pointer capitalize ${
+                      difficulty === level
+                        ? level === "advanced" ? "border-red-300 bg-red-50 text-red-600"
+                          : level === "intermediate" ? "border-amber-300 bg-amber-50 text-amber-600"
+                          : "border-emerald-300 bg-emerald-50 text-emerald-600"
+                        : "border-black/[0.08] text-[#9CA3AF] hover:border-black/20"
+                    }`}
+                  >{level}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#0A0A0F] mb-1.5">Tags</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  placeholder="Add a tag and press Enter..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const trimmed = tagInput.trim().toLowerCase();
+                      if (trimmed && !tags.includes(trimmed) && tags.length < 5) {
+                        setTags([...tags, trimmed]);
+                        setTagInput("");
+                      }
+                    }
+                  }}
+                  className="flex-1 h-11 px-4 rounded-2xl border border-black/[0.08] bg-white text-[#0A0A0F] placeholder-[#9CA3AF] focus:outline-none focus:border-[#FF2D2D] focus:ring-2 focus:ring-red-100 transition-all text-sm"
+                  style={{boxShadow:"0 1px 4px rgba(0,0,0,0.04)"}}
+                />
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-black/[0.04] text-[#374151] rounded-full border border-black/[0.06]">
+                      #{tag}
+                      <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))}
+                        className="hover:text-red-500 cursor-pointer"
+                      ><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-[#9CA3AF] mt-1.5">{5 - tags.length} tags remaining</p>
             </div>
           </div>
 

@@ -11,11 +11,11 @@ export async function GET(
     const supabase = await createClient();
 
     // Increment view count via RPC
-    await supabase.rpc("increment_idea_view", { p_idea_id: id });
+    await supabase.rpc("increment_challenge_views", { p_challenge_id: id });
 
     const { data, error } = await supabase
-      .from("ideas")
-      .select("*, creator:users!ideas_creator_id_fkey(*)")
+      .from("challenges")
+      .select("*, creator:users!challenges_creator_id_fkey(*)")
       .eq("id", id)
       .single();
 
@@ -27,7 +27,7 @@ export async function GET(
     const { data: comments } = await supabase
       .from("comments")
       .select("*, user:users!comments_user_id_fkey(*)")
-      .eq("idea_id", id)
+      .eq("challenge_id", id)
       .order("created_at", { ascending: true });
 
     // Check if current user liked this idea
@@ -38,9 +38,9 @@ export async function GET(
     let liked = false;
     if (user) {
       const { data: likeData } = await supabase
-        .from("idea_likes")
+        .from("challenge_likes")
         .select("id")
-        .eq("idea_id", id)
+        .eq("challenge_id", id)
         .eq("user_id", user.id)
         .maybeSingle();
       liked = !!likeData;
@@ -67,7 +67,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { error } = await supabase.from("ideas").delete().eq("id", id);
+    const { error } = await supabase.from("challenges").delete().eq("id", id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 403 });

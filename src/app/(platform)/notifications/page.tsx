@@ -7,10 +7,13 @@ import {
   UserPlus,
   CheckCircle2,
   XCircle,
-  FolderKanban,
+  Flame,
   MessageCircle,
   Heart,
-  ListTodo,
+  Swords,
+  Star,
+  Zap,
+  Trophy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn, timeAgo } from "@/lib/utils";
@@ -27,8 +30,8 @@ function getNotificationHref(n: Notification): string {
     case "comment":
     case "like":
       return ref ? `/ideas/${ref}` : "/ideas";
-    case "project_created":
-    case "task_assigned":
+    case "run_started":
+    case "mission_assigned":
       return ref ? `/projects/${ref}` : "/projects";
     default:
       return "/notifications";
@@ -75,11 +78,29 @@ const demoNotifications: Notification[] = [
   {
     id: "n5",
     user_id: "demo-1",
-    type: "task_assigned",
+    type: "mission_assigned",
     message: "You were assigned 'Build AI quiz generator' in AI Study Companion",
     reference_id: null,
     read: true,
     created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "n6",
+    user_id: "demo-1",
+    type: "badge_earned",
+    message: "You earned the 'AI Architect' badge!",
+    reference_id: null,
+    read: false,
+    created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "n7",
+    user_id: "demo-1",
+    type: "level_up",
+    message: "You leveled up to Level 6!",
+    reference_id: null,
+    read: true,
+    created_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
@@ -87,20 +108,28 @@ const typeIcons: Record<Notification["type"], React.ElementType> = {
   new_application: UserPlus,
   application_accepted: CheckCircle2,
   application_rejected: XCircle,
-  project_created: FolderKanban,
-  task_assigned: ListTodo,
+  run_started: Flame,
+  mission_assigned: Swords,
+  mission_completed: Trophy,
+  phase_completed: Star,
   comment: MessageCircle,
   like: Heart,
+  badge_earned: Star,
+  level_up: Zap,
 };
 
 const typeColors: Record<Notification["type"], string> = {
-  new_application: "bg-blue-50 text-blue-500",
-  application_accepted: "bg-emerald-50 text-emerald-500",
-  application_rejected: "bg-red-50 text-red-500",
-  project_created: "bg-purple-50 text-purple-500",
-  task_assigned: "bg-amber-50 text-amber-500",
-  comment: "bg-[#FFF0F0] text-[#FF2D2D]",
-  like: "bg-pink-50 text-pink-500",
+  new_application: "bg-[#00E5FF]/10 text-[#00E5FF]",
+  application_accepted: "bg-[#00FFA3]/10 text-[#00FFA3]",
+  application_rejected: "bg-[#FF3366]/10 text-[#FF3366]",
+  run_started: "bg-[#A855F7]/10 text-[#A855F7]",
+  mission_assigned: "bg-[#FFD700]/10 text-[#FFD700]",
+  mission_completed: "bg-[#00FFA3]/10 text-[#00FFA3]",
+  phase_completed: "bg-[#00E5FF]/10 text-[#00E5FF]",
+  comment: "bg-[#FF3366]/10 text-[#FF3366]",
+  like: "bg-[#FF6B9D]/10 text-[#FF6B9D]",
+  badge_earned: "bg-[#FFD700]/10 text-[#FFD700]",
+  level_up: "bg-[#00E5FF]/10 text-[#00E5FF]",
 };
 
 export default function NotificationsPage() {
@@ -168,8 +197,8 @@ export default function NotificationsPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0A0A0F] tracking-tight">Notifications</h1>
-            <p className="text-[#9CA3AF] mt-1 text-sm">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Notifications</h1>
+            <p className="text-[#64748B] mt-1 text-sm">
               {unreadCount > 0
                 ? `${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
                 : "You're all caught up! ✓"}
@@ -178,7 +207,7 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
               onClick={markAllRead}
-              className="text-sm font-bold text-[#FF2D2D] hover:underline cursor-pointer"
+              className="text-sm font-bold text-[#FF3366] hover:underline cursor-pointer"
             >
               Mark all read
             </motion.button>
@@ -198,8 +227,8 @@ export default function NotificationsPage() {
                   className={cn(
                     "w-full text-left flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 group",
                     notification.read
-                      ? "glass-strong border-white/80 hover:border-black/10"
-                      : "bg-[#FFF8F8] border-red-100 shadow-sm"
+                      ? "glass-dark border-white/[0.06] hover:border-white/10"
+                      : "bg-[#FF3366]/5 border-[#FF3366]/10 shadow-sm"
                   )}
                 >
                   <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0", colorClass)}>
@@ -208,7 +237,7 @@ export default function NotificationsPage() {
                   <div className="flex-1 min-w-0">
                     <p className={cn(
                       "text-sm leading-relaxed",
-                      notification.read ? "text-[#6B7280]" : "text-[#0A0A0F] font-semibold"
+                      notification.read ? "text-[#64748B]" : "text-white font-semibold"
                     )}>
                       {notification.message}
                     </p>
@@ -217,7 +246,7 @@ export default function NotificationsPage() {
                     </p>
                   </div>
                   {!notification.read && (
-                    <div className="w-2 h-2 bg-[#FF2D2D] rounded-full flex-shrink-0 mt-2 animate-pulse" />
+                    <div className="w-2 h-2 bg-[#FF3366] rounded-full flex-shrink-0 mt-2 animate-pulse" />
                   )}
                 </button>
               </motion.div>
@@ -227,12 +256,11 @@ export default function NotificationsPage() {
 
         {notifications.length === 0 && (
           <div className="text-center py-24">
-            <div className="w-16 h-16 glass-strong rounded-3xl flex items-center justify-center mx-auto mb-4 border border-white/80"
-              style={{boxShadow:"0 4px 20px rgba(0,0,0,0.06)"}}>
-              <Bell className="w-8 h-8 text-[#9CA3AF]" />
+            <div className="w-16 h-16 glass-dark rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/[0.06]">
+              <Bell className="w-8 h-8 text-[#64748B]" />
             </div>
-            <h3 className="text-lg font-bold text-[#0A0A0F] mb-2">No notifications</h3>
-            <p className="text-[#9CA3AF] text-sm">You&apos;ll see updates here when something happens.</p>
+            <h3 className="text-lg font-bold text-white mb-2">No notifications</h3>
+            <p className="text-[#64748B] text-sm">You&apos;ll see updates here when something happens.</p>
           </div>
         )}
       </motion.div>

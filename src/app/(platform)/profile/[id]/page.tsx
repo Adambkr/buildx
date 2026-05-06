@@ -29,6 +29,8 @@ const demoProfile: User = {
   skills: ["React", "Python", "TensorFlow", "Next.js", "PostgreSQL", "UI/UX"],
   role: "user",
   reputation_score: 85,
+  xp: 1020,
+  level: 5,
   created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
 };
 
@@ -61,13 +63,13 @@ export default function ProfilePage({
         }
 
         const { count: iCount } = await supabase
-          .from("ideas")
+          .from("challenges")
           .select("*", { count: "exact", head: true })
           .eq("creator_id", id);
         setIdeasCount(iCount ?? 0);
 
         const { count: pCount } = await supabase
-          .from("project_members")
+          .from("run_members")
           .select("*", { count: "exact", head: true })
           .eq("user_id", id);
         setProjectsCount(pCount ?? 0);
