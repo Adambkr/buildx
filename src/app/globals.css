@@ -164,6 +164,33 @@ body {
   animation: gradient-flow 6s ease infinite;
 }
 
+.gradient-bg {
+  background: linear-gradient(135deg, #FF3366 0%, #FF6B9D 50%, #A855F7 100%);
+  background-size: 200% 200%;
+  animation: gradient-flow 6s ease infinite;
+}
+
+.gradient-bg-vibrant {
+  background: linear-gradient(135deg, #FF2D2D 0%, #FF6B6B 50%, #FF9A3C 100%);
+  background-size: 200% 200%;
+  animation: gradient-flow 6s ease infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #FF3366 0%, #FF6B9D 40%, #00E5FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mesh-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,51,102,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(168,85,247,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%),
+    #050507;
+}
+
 .bg-gradient-cyan {
   background: linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%);
 }
