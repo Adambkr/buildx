@@ -61,9 +61,11 @@ export default function RunsPage() {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
+    if (user === null) {
+      const t = setTimeout(() => { setProjects(demoProjects); setDataLoaded(true); }, 800);
+      return () => clearTimeout(t);
+    }
     const fetchProjects = async () => {
-      if (user === null && !dataLoaded) return;
-      if (user === null) { setProjects(demoProjects); setDataLoaded(true); return; }
       try {
         const supabase = createClient();
         const [memberRows, ideasRes] = await Promise.all([

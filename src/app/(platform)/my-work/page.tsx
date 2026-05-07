@@ -47,13 +47,14 @@ export default function MyWorkPage() {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (user === null && !dataLoaded) return;
     if (user === null) {
-      setTasks(demoTasks);
-      setProjects(demoProjects);
-      setApplications(demoApplications);
-      setDataLoaded(true);
-      return;
+      const t = setTimeout(() => {
+        setTasks(demoTasks);
+        setProjects(demoProjects);
+        setApplications(demoApplications);
+        setDataLoaded(true);
+      }, 800);
+      return () => clearTimeout(t);
     }
     const load = async () => {
       try {

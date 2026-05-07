@@ -142,8 +142,13 @@ export default function NotificationsPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (user === null && !loaded) return;
-    if (user === null) { setNotifications(demoNotifications); setLoaded(true); return; }
+    if (user === null) {
+      const t = setTimeout(() => {
+        setNotifications(demoNotifications);
+        setLoaded(true);
+      }, 800);
+      return () => clearTimeout(t);
+    }
     const load = async () => {
       try {
         const supabase = createClient();
