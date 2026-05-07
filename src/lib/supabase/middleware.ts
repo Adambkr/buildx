@@ -33,14 +33,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect platform routes
+  // Protect platform routes that truly require authentication
   const protectedPaths = [
     "/ideas/new",
-    "/ideas",
-    "/projects",
     "/profile",
-    "/notifications",
-    "/my-work",
   ];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
