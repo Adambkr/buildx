@@ -29,15 +29,17 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // If Supabase is unreachable, allow the request through
+    return supabaseResponse;
+  }
 
   // Protect platform routes that truly require authentication
-  const protectedPaths = [
-    "/ideas/new",
-    "/profile",
-  ];
+  const protectedPaths = ["/ideas/new", "/profile"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -50,14 +52,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Protect admin routes
-  if (request.nextUrl.pathname.startsWith("/admin")) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("next", request.nextUrl.pathname);
-      return NextResponse.redirect(url);
-    }
-    // Additional admin role check happens in the admin layout
+  if (request.nextUrl.pathname.startsWith("/admin") && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
